@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+.env
+.env.local
+.env*.local
+
+# Runtime data (RSVP submissions) — never commit guest responses
+/data/rsvps.json
+/data/*.local.json
+
+.DS_Store
+npm-debug.log*

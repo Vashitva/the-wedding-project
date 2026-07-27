@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+/*
+ * Palette: warm paper, deep ink, a muted olive for accents and a soft gold for
+ * rules and flourishes. Deliberately low-contrast in the decoration, high
+ * contrast in the text.
+ */
+/*
+ * `@theme` registers the palette and generates the utilities. It is always
+ * hoisted to the top of the stylesheet, so it cannot itself be nested in a
+ * media query — the dark scheme instead re-declares the same custom properties
+ * on :root below, which the generated `var(--color-*)` utilities pick up.
+ */
+@theme {
+  --color-paper: #fbf8f3;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunk: #f3ede4;
+  --color-ink: #22201d;
+  --color-ink-soft: #5c564e;
+  --color-ink-faint: #8c847a;
+  --color-olive: #5f6b4f;
+  --color-olive-soft: #849072;
+  --color-gold: #b39352;
+  --color-line: #e2d9cb;
+  --color-blush: #d9c3b8;
+  /* Text that sits on an olive fill. */
+  --color-on-olive: #fbf8f3;
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia,
+    "Times New Roman", serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #16150f;
+    --color-paper-raised: #1e1d16;
+    --color-paper-sunk: #12110c;
+    --color-ink: #f2ede3;
+    --color-ink-soft: #c4bcae;
+    --color-ink-faint: #97907f;
+    --color-olive: #a8b795;
+    --color-olive-soft: #8b9a79;
+    --color-gold: #d0ab63;
+    --color-line: #322f26;
+    --color-blush: #6d5349;
+    /* The olive lightens in the dark scheme, so its label has to darken. */
+    --color-on-olive: #16150f;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* The sticky header shouldn't cover a section it just scrolled to. */
+    scroll-padding-top: 5.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--color-blush);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-olive);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Small caps label used above section headings. */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  .rule {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-line) 20%,
+      var(--color-line) 80%,
+      transparent
+    );
+  }
+
+  /* A thin gold diamond used as a section divider. */
+  .diamond::before {
+    content: "";
+    display: block;
+    width: 7px;
+    height: 7px;
+    margin: 0 auto;
+    transform: rotate(45deg);
+    border: 1px solid var(--color-gold);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8125rem 1.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease,
+      transform 200ms ease;
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    background: var(--color-olive);
+    color: var(--color-on-olive);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    border-color: var(--color-line);
+    color: var(--color-ink);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--color-olive);
+    color: var(--color-olive);
+  }
+
+  .field {
+    width: 100%;
+    padding: 0.6875rem 0.875rem;
+    background: var(--color-paper-raised);
+    border: 1px solid var(--color-line);
+    color: var(--color-ink);
+    font-size: 0.9375rem;
+    transition: border-color 160ms ease;
+  }
+
+  .field::placeholder {
+    color: var(--color-ink-faint);
+  }
+
+  .field:focus {
+    border-color: var(--color-olive);
+    outline-offset: 0;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    margin-bottom: 0.4375rem;
+  }
+
+  .card {
+    background: var(--color-paper-raised);
+    border: 1px solid var(--color-line);
+  }
+}
+
+@layer utilities {
+  .fade-up {
+    animation: fade-up 900ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Applied by the reveal-on-scroll observer in Reveal.tsx. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 800ms cubic-bezier(0.2, 0.65, 0.3, 1),
+      transform 800ms cubic-bezier(0.2, 0.65, 0.3, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media print {
+  header nav,
+  .no-print {
+    display: none !important;
+  }
+}

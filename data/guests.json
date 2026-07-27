@@ -1,0 +1,58 @@
+[
+  {
+    "id": "okafor-family",
+    "code": "HAZEL",
+    "displayName": "The Okafor Family",
+    "events": ["welcome-drinks", "ceremony", "reception", "farewell-brunch"],
+    "plusOnesAllowed": 0,
+    "members": [
+      { "id": "tom-okafor", "firstName": "Tom", "lastName": "Okafor" },
+      { "id": "sade-okafor", "firstName": "Sade", "lastName": "Okafor" },
+      { "id": "ife-okafor", "firstName": "Ife", "lastName": "Okafor", "isChild": true }
+    ]
+  },
+  {
+    "id": "lindqvist-nina",
+    "code": "ROWAN",
+    "displayName": "Nina Lindqvist",
+    "events": ["welcome-drinks", "ceremony", "reception", "farewell-brunch"],
+    "plusOnesAllowed": 1,
+    "members": [
+      { "id": "nina-lindqvist", "firstName": "Nina", "lastName": "Lindqvist" }
+    ]
+  },
+  {
+    "id": "mehta-priya-dev",
+    "code": "CEDAR",
+    "displayName": "Priya Mehta & Dev Raman",
+    "events": ["welcome-drinks", "ceremony", "reception", "farewell-brunch"],
+    "plusOnesAllowed": 0,
+    "members": [
+      { "id": "priya-mehta", "firstName": "Priya", "lastName": "Mehta" },
+      { "id": "dev-raman", "firstName": "Dev", "lastName": "Raman" }
+    ]
+  },
+  {
+    "id": "harlow-jo",
+    "code": "ASPEN",
+    "displayName": "Jo Harlow",
+    "events": ["ceremony", "reception"],
+    "plusOnesAllowed": 1,
+    "members": [
+      { "id": "jo-harlow", "firstName": "Jo", "lastName": "Harlow" }
+    ]
+  },
+  {
+    "id": "vance-family",
+    "code": "LINDEN",
+    "displayName": "Marcus & Elena Vance",
+    "events": ["ceremony", "reception", "farewell-brunch"],
+    "plusOnesAllowed": 0,
+    "members": [
+      { "id": "marcus-vance", "firstName": "Marcus", "lastName": "Vance" },
+      { "id": "elena-vance", "firstName": "Elena", "lastName": "Vance" },
+      { "id": "leo-vance", "firstName": "Leo", "lastName": "Vance", "isChild": true },
+      { "id": "mara-vance", "firstName": "Mara", "lastName": "Vance", "isChild": true }
+    ]
+  }
+]
