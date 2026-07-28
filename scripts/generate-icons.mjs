@@ -1,5 +1,5 @@
 /**
- * Generates the PWA icon set — two interlocking rings on an olive field.
+ * Generates the PWA icon set — two interlocking gold rings on sindoor red.
  *
  * Geometry rather than an image library — see scripts/lib/png.mjs.
  *
@@ -12,8 +12,8 @@ import { encodePng } from "./lib/png.mjs";
 
 const OUT_DIR = path.join(process.cwd(), "public", "icons");
 
-const OLIVE = [95, 107, 79];
-const GOLD = [222, 201, 148];
+const FIELD = [124, 26, 40];
+const RING = [238, 205, 138];
 
 /* ── Drawing ─────────────────────────────────────────────────────────── */
 
@@ -60,7 +60,7 @@ function drawIcon(size, { padding }) {
 
       const i = (y * size + x) * 4;
       for (let c = 0; c < 3; c++) {
-        rgba[i + c] = Math.round(OLIVE[c] + (GOLD[c] - OLIVE[c]) * coverage);
+        rgba[i + c] = Math.round(FIELD[c] + (RING[c] - FIELD[c]) * coverage);
       }
       rgba[i + 3] = 255;
     }

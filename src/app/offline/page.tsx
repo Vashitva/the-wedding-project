@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { wedding } from "@config/wedding";
 import { formatTimeRange, groupEventsByDay } from "@/lib/format";
+import Ornament from "@/components/Ornament";
 
 export const metadata: Metadata = { title: "Offline" };
 
@@ -24,11 +25,11 @@ export default function OfflinePage() {
         </p>
       </div>
 
-      <div className="diamond my-10" />
+      <Ornament className="my-10" />
 
       {days.map((day) => (
         <div key={day.key} className="mb-10">
-          <h2 className="font-display text-2xl text-olive">{day.label}</h2>
+          <h2 className="font-display text-2xl text-marigold">{day.label}</h2>
           <div className="rule mt-3 mb-5" />
           <ul className="space-y-5">
             {day.events.map((event) => (

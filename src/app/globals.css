@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /*
- * Palette: warm paper, deep ink, a muted olive for accents and a soft gold for
- * rules and flourishes. Deliberately low-contrast in the decoration, high
- * contrast in the text.
+ * Palette drawn from an Indian wedding: marigold (genda) for accents, sindoor
+ * red for the deepest notes, gold for rules and flourishes, on a warm
+ * haldi-tinted ivory. Saturated in the ornament, restrained in the text.
  */
 /*
  * `@theme` registers the palette and generates the utilities. It is always
@@ -12,41 +12,44 @@
  * on :root below, which the generated `var(--color-*)` utilities pick up.
  */
 @theme {
-  --color-paper: #fbf8f3;
-  --color-paper-raised: #ffffff;
-  --color-paper-sunk: #f3ede4;
-  --color-ink: #22201d;
-  --color-ink-soft: #5c564e;
-  --color-ink-faint: #8c847a;
-  --color-olive: #5f6b4f;
-  --color-olive-soft: #849072;
-  --color-gold: #b39352;
-  --color-line: #e2d9cb;
-  --color-blush: #d9c3b8;
-  /* Text that sits on an olive fill. */
-  --color-on-olive: #fbf8f3;
+  --color-paper: #fdf7ec;
+  --color-paper-raised: #fffdf8;
+  --color-paper-sunk: #f8ecda;
+  --color-ink: #2b1710;
+  --color-ink-soft: #6a4a3c;
+  --color-ink-faint: #9c7f6f;
+  --color-marigold: #b8531f;
+  --color-marigold-soft: #d9812c;
+  --color-sindoor: #8c1d2c;
+  --color-gold: #a9822f;
+  --color-line: #ecdcc4;
+  --color-blush: #f0cdb4;
+  /* Text that sits on a marigold fill. */
+  --color-on-marigold: #fffaf2;
 
   --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia,
     "Times New Roman", serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
+  --font-script: var(--font-devanagari), "Noto Serif Devanagari", serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: #16150f;
-    --color-paper-raised: #1e1d16;
-    --color-paper-sunk: #12110c;
-    --color-ink: #f2ede3;
-    --color-ink-soft: #c4bcae;
-    --color-ink-faint: #97907f;
-    --color-olive: #a8b795;
-    --color-olive-soft: #8b9a79;
-    --color-gold: #d0ab63;
-    --color-line: #322f26;
-    --color-blush: #6d5349;
-    /* The olive lightens in the dark scheme, so its label has to darken. */
-    --color-on-olive: #16150f;
+    --color-paper: #17100c;
+    --color-paper-raised: #211711;
+    --color-paper-sunk: #120b08;
+    --color-ink: #f6ece0;
+    --color-ink-soft: #d0b8a5;
+    --color-ink-faint: #a08a79;
+    --color-marigold: #e89448;
+    --color-marigold-soft: #d07c33;
+    --color-sindoor: #c9505f;
+    --color-gold: #d9ac5c;
+    --color-line: #3a2820;
+    --color-blush: #7a4436;
+    /* The marigold lightens in the dark scheme, so its label has to darken. */
+    --color-on-marigold: #2b1710;
   }
 }
 
@@ -97,7 +100,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-olive);
+    outline: 2px solid var(--color-marigold);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -124,17 +127,6 @@
     );
   }
 
-  /* A thin gold diamond used as a section divider. */
-  .diamond::before {
-    content: "";
-    display: block;
-    width: 7px;
-    height: 7px;
-    margin: 0 auto;
-    transform: rotate(45deg);
-    border: 1px solid var(--color-gold);
-  }
-
   .btn {
     display: inline-flex;
     align-items: center;
@@ -157,8 +149,8 @@
   }
 
   .btn-primary {
-    background: var(--color-olive);
-    color: var(--color-on-olive);
+    background: var(--color-marigold);
+    color: var(--color-on-marigold);
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -177,8 +169,8 @@
   }
 
   .btn-ghost:hover {
-    border-color: var(--color-olive);
-    color: var(--color-olive);
+    border-color: var(--color-marigold);
+    color: var(--color-marigold);
   }
 
   .field {
@@ -196,7 +188,7 @@
   }
 
   .field:focus {
-    border-color: var(--color-olive);
+    border-color: var(--color-marigold);
     outline-offset: 0;
   }
 
@@ -266,30 +258,30 @@
    * Fixed values in both schemes: a film frame is dark either way.
    */
   :root {
-    --cinema-ink: #f4efe6;
-    --cinema-ink-soft: #cfc7b8;
-    --cinema-gold: #d8b978;
-    --cinema-line: rgba(207, 199, 184, 0.4);
-    --cinema-cue: rgba(207, 199, 184, 0.5);
-    --cinema-rule: rgba(216, 185, 120, 0.7);
+    --cinema-ink: #fbf1e2;
+    --cinema-ink-soft: #ddc7ad;
+    --cinema-gold: #eab452;
+    --cinema-line: rgba(221, 199, 173, 0.42);
+    --cinema-cue: rgba(221, 199, 173, 0.5);
+    --cinema-rule: rgba(234, 180, 82, 0.75);
   }
 }
 
 @layer components {
   .cinema {
-    background-color: #0d0e0b;
+    background-color: #140b07;
   }
 
-  /* Primary action on the frame. Gold rather than olive — olive disappears
+  /* Primary action on the frame. Gold rather than marigold — marigold disappears
      into a dark backdrop, and this picks up the hairlines. */
   .btn-cinema {
     background: var(--cinema-gold);
-    color: #14150f;
+    color: #2b1710;
   }
 
   .btn-cinema:hover {
     background: var(--cinema-ink);
-    color: #14150f;
+    color: #2b1710;
   }
 
   .btn-cinema-ghost {

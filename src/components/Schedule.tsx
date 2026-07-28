@@ -18,7 +18,7 @@ export default function Schedule() {
       <div className="mx-auto max-w-3xl space-y-14">
         {days.map((day, dayIndex) => (
           <Reveal key={day.key} delay={dayIndex * 80}>
-            <h3 className="font-display text-2xl text-olive">{day.label}</h3>
+            <h3 className="font-display text-2xl text-marigold">{day.label}</h3>
             <div className="rule mt-4 mb-8" />
 
             <ol className="space-y-8">
@@ -50,7 +50,7 @@ export default function Schedule() {
                             href={mapsUrl(event.address)}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-olive underline decoration-line underline-offset-4 hover:decoration-olive"
+                            className="text-marigold underline decoration-line underline-offset-4 hover:decoration-marigold"
                           >
                             {event.venue}
                           </a>

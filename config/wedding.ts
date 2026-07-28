@@ -71,7 +71,7 @@ export const wedding = {
   },
 
   /** The headline date — used by the countdown and the "add to calendar" link. */
-  weddingDate: "2027-05-15T16:00:00-04:00",
+  weddingDate: "2027-05-15T12:00:00-04:00",
   timeZone: "America/New_York",
 
   location: {
@@ -96,7 +96,15 @@ export const wedding = {
     headline: "Avery & Rohan",
     subhead: "May 15, 2027 · Hudson Valley, New York",
     invitation:
-      "Two people, one very long series of coincidences, and a barn with excellent acoustics. We would love for you to be there.",
+      "Three days, two families, one mandap in a Hudson Valley meadow, and a great deal of food. We would love for you to be there.",
+
+    /**
+     * An optional line above the names, set in Devanagari. "शुभ विवाह" is a
+     * general auspicious-wedding phrase; swap it for your own script, an
+     * invocation your family uses, or your names — or set it to "" to hide the
+     * line entirely.
+     */
+    script: "शुभ विवाह",
 
     /**
      * The landing is a full-bleed cinematic frame. Drop in a photograph or a
@@ -153,48 +161,82 @@ export const wedding = {
    */
   events: [
     {
-      id: "welcome-drinks",
-      name: "Welcome Drinks",
-      start: "2027-05-14T19:00:00-04:00",
-      end: "2027-05-14T22:00:00-04:00",
-      venue: "The Hollow Tavern",
-      address: "12 Mill Street, Rhinebeck, NY 12572",
+      id: "mehendi",
+      name: "Mehendi",
+      start: "2027-05-14T15:00:00-04:00",
+      end: "2027-05-14T19:00:00-04:00",
+      venue: "The Orchard Room",
+      address: "5 Landing Road, Rhinebeck, NY 12572",
       description:
-        "Come say hello the night before. Drinks, snacks, and no speeches of any kind — we promise.",
-      dressCode: "Whatever you travelled in",
+        "Henna, chai and far too many snacks. Come and get a design done — the artists work until the last hand is finished. Allow a couple of hours for it to dry, and wear something with short sleeves.",
+      dressCode: "Bright and comfortable",
       optional: true,
     },
     {
-      id: "ceremony",
-      name: "The Ceremony",
-      start: "2027-05-15T16:00:00-04:00",
-      end: "2027-05-15T16:45:00-04:00",
-      venue: "Thornfield Barn — the meadow",
-      address: "884 Quarry Road, Rhinebeck, NY 12572",
-      description:
-        "Outdoors on the grass, so please consider your heel-to-soil ratio. Seating opens at 3:30pm.",
-      dressCode: "Garden formal",
-    },
-    {
-      id: "reception",
-      name: "Dinner & Dancing",
-      start: "2027-05-15T17:30:00-04:00",
-      end: "2027-05-16T00:00:00-04:00",
+      id: "sangeet",
+      name: "Sangeet",
+      start: "2027-05-14T19:30:00-04:00",
+      end: "2027-05-14T23:30:00-04:00",
       venue: "Thornfield Barn",
       address: "884 Quarry Road, Rhinebeck, NY 12572",
       description:
-        "Cocktails on the terrace, dinner at seven, and then a dance floor that we are told is structurally sound.",
-      dressCode: "Garden formal",
+        "The night both families perform, with varying degrees of preparation. Dinner, a dance floor, and a running order nobody will stick to.",
+      dressCode: "Indian festive",
+    },
+    {
+      id: "haldi",
+      name: "Haldi",
+      start: "2027-05-15T09:00:00-04:00",
+      end: "2027-05-15T10:30:00-04:00",
+      venue: "Thornfield Barn — the courtyard",
+      address: "884 Quarry Road, Rhinebeck, NY 12572",
+      description:
+        "Turmeric paste, applied enthusiastically by everyone who loves us. Genuinely: wear something you will never want to wear again.",
+      dressCode: "Yellow, and expendable",
+      optional: true,
+    },
+    {
+      id: "baraat",
+      name: "The Baraat",
+      start: "2027-05-15T11:00:00-04:00",
+      end: "2027-05-15T11:45:00-04:00",
+      venue: "Quarry Road, at the gate",
+      address: "884 Quarry Road, Rhinebeck, NY 12572",
+      description:
+        "Rohan arrives with a dhol, a procession and no sense of hurry. Everyone is welcome to join — this is the dancing-in-the-road part, and it is the best forty-five minutes of the weekend.",
+      dressCode: "Indian formal",
+    },
+    {
+      id: "ceremony",
+      name: "The Wedding Ceremony",
+      start: "2027-05-15T12:00:00-04:00",
+      end: "2027-05-15T14:00:00-04:00",
+      venue: "Thornfield Barn — the meadow mandap",
+      address: "884 Quarry Road, Rhinebeck, NY 12572",
+      description:
+        "The pheras, under a mandap on the grass. The priest will explain each step in English as we go. Seating is open, lunch follows immediately, and the whole thing runs about two hours.",
+      dressCode: "Indian formal",
+    },
+    {
+      id: "reception",
+      name: "Reception",
+      start: "2027-05-15T19:00:00-04:00",
+      end: "2027-05-16T01:00:00-04:00",
+      venue: "Thornfield Barn",
+      address: "884 Quarry Road, Rhinebeck, NY 12572",
+      description:
+        "Cocktails, dinner, speeches of unpredictable length, and a dance floor that we are told is structurally sound.",
+      dressCode: "Indian formal or black tie",
     },
     {
       id: "farewell-brunch",
       name: "Farewell Brunch",
-      start: "2027-05-16T10:00:00-04:00",
-      end: "2027-05-16T13:00:00-04:00",
+      start: "2027-05-16T11:00:00-04:00",
+      end: "2027-05-16T14:00:00-04:00",
       venue: "The Orchard Room",
       address: "5 Landing Road, Rhinebeck, NY 12572",
       description:
-        "Drop in on your way out of town. Coffee, eggs, and a full accounting of the night before.",
+        "Drop in on your way out of town. Chai, poha, eggs for the homesick, and a full accounting of the night before.",
       dressCode: "Comfortable",
       optional: true,
     },
@@ -254,24 +296,24 @@ export const wedding = {
   /** Meal options offered in the RSVP form. Empty array hides the question. */
   meals: [
     {
-      id: "beef",
-      name: "Braised short rib",
-      description: "With horseradish mash and roast carrots",
+      id: "veg",
+      name: "Vegetarian",
+      description: "The full thali — this is what most of the menu is anyway",
     },
     {
-      id: "fish",
-      name: "Hudson trout",
-      description: "With brown butter, capers and new potatoes",
+      id: "jain",
+      name: "Jain",
+      description: "No onion, garlic or root vegetables, cooked separately",
     },
     {
-      id: "vegetarian",
-      name: "Wild mushroom tart",
-      description: "With spring greens and a soft herb dressing (vegan on request)",
+      id: "nonveg",
+      name: "Non-vegetarian",
+      description: "Served alongside the vegetarian dishes at dinner",
     },
     {
       id: "kids",
       name: "Children's plate",
-      description: "For guests under 12 — pasta, chicken, or whatever works",
+      description: "For guests under 12 — mild, and there is always pasta",
     },
   ] satisfies MealChoice[],
 
@@ -324,39 +366,54 @@ export const wedding = {
 
   faq: [
     {
-      question: "Can I bring a plus one?",
+      question: "What should I wear?",
       answer:
-        "Your invitation lists everyone we have room for by name — you will see them when you look up your RSVP. We wish the barn were bigger.",
+        "Indian formal for the ceremony and reception, and something bright and comfortable for the mehendi. For the haldi, wear yellow and wear something you are happy to throw away afterwards — the turmeric does not come out.",
+    },
+    {
+      question: "I don't own Indian clothes. Is that a problem?",
+      answer:
+        "Not at all — a suit or a smart dress is completely fine, and plenty of guests will be in one. If you would like to wear something Indian, we would love that, and Nina has a list of places in New York and online that rent and deliver. Just ask.",
+    },
+    {
+      question: "Are there colours I should avoid?",
+      answer:
+        "White and black are traditionally avoided at Hindu weddings, and red tends to be left to the bride. Beyond that, the brighter the better — this is not an occasion for beige.",
+    },
+    {
+      question: "What actually happens at the baraat?",
+      answer:
+        "Rohan arrives at the gate with a dhol player and everyone dances him in. It is loud, it lasts about forty-five minutes, and you are very much invited to join rather than watch. Arrive by 10:45am if you want to be part of it.",
+    },
+    {
+      question: "How long is the ceremony?",
+      answer:
+        "About two hours. The priest explains each step in English as it happens, so it is easy to follow even if it is your first Hindu wedding. Seating is open, people come and go, and lunch is served straight afterwards.",
+    },
+    {
+      question: "Will there be food I can eat?",
+      answer:
+        "Yes. The menu is largely vegetarian, with Jain food prepared separately and non-vegetarian dishes at dinner. Tell us what you need in your RSVP and it will be handled — including allergies.",
+    },
+    {
+      question: "Is there alcohol?",
+      answer:
+        "At the sangeet and the reception, yes. The haldi and the ceremony are dry, which is usually for the best given what the haldi involves.",
     },
     {
       question: "Are children invited?",
       answer:
-        "Yes, and there is a kids' menu and a quiet room upstairs. If your invitation names your children, they are very much expected.",
+        "Yes, and there is a kids' menu and a quiet room upstairs at the barn. If your invitation names your children, they are very much expected.",
     },
     {
-      question: "What should I wear?",
+      question: "Do I have to come to everything?",
       answer:
-        "Garden formal. The ceremony is on grass — flat shoes or block heels will save you. It cools down quickly after sunset, so bring a layer.",
-    },
-    {
-      question: "What if it rains?",
-      answer:
-        "Everything moves inside the barn. You will not get wet, and we will not be visibly upset about it for more than ten minutes.",
-    },
-    {
-      question: "Is there parking?",
-      answer:
-        "Yes, free and on site, and you can leave your car overnight and collect it before noon the next day.",
+        "No. Come to whatever you can — the RSVP lets you answer for each event separately, and nobody will be counting.",
     },
     {
       question: "When should I RSVP by?",
       answer:
-        "27 March 2027. After that the caterers start making decisions on your behalf.",
-    },
-    {
-      question: "Can I take photos?",
-      answer:
-        "During the ceremony, please don't — we have someone for that, and we would love to see your faces rather than your phones. Afterwards, go wild.",
+        "27 March 2027. After that the caterers start making decisions on your behalf, and they cater for a crowd.",
     },
   ] satisfies FaqItem[],
 

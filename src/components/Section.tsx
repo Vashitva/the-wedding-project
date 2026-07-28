@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Reveal from "./Reveal";
+import Ornament from "./Ornament";
 
 /** Shared section shell: consistent rhythm, eyebrow, heading and optional intro. */
 export default function Section({
@@ -36,7 +37,7 @@ export default function Section({
                 {intro}
               </p>
             )}
-            <div className="diamond mt-8" />
+            <Ornament className="mt-8" />
           </Reveal>
         )}
         {children}

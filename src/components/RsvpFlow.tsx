@@ -5,6 +5,7 @@ import Link from "next/link";
 import { wedding } from "@config/wedding";
 import { formatDayAndMonth, formatTimeRange } from "@/lib/format";
 import type { Party, Rsvp } from "@/lib/types";
+import Ornament from "./Ornament";
 
 type Option = { id: string; displayName: string };
 
@@ -168,7 +169,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
           {coming.length > 0 ? "We can't wait to see you" : "We'll miss you"}
         </h1>
 
-        <div className="diamond my-9" />
+        <Ornament className="my-9" />
 
         <div className="card p-7 text-left">
           <p className="eyebrow mb-4">{stage.party.displayName}</p>
@@ -176,7 +177,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
             {stage.rsvp.responses.map((r) => (
               <li key={r.guestId} className="flex items-baseline justify-between gap-4">
                 <span>{r.name}</span>
-                <span className={r.attending ? "text-olive text-sm" : "text-ink-faint text-sm"}>
+                <span className={r.attending ? "text-marigold text-sm" : "text-ink-faint text-sm"}>
                   {r.attending
                     ? r.events.map(eventName).join(", ")
                     : "Not able to come"}
@@ -186,7 +187,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
             {plus.map((p) => (
               <li key={p.name} className="flex items-baseline justify-between gap-4">
                 <span>{p.name}</span>
-                <span className="text-olive text-sm">Coming</span>
+                <span className="text-marigold text-sm">Coming</span>
               </li>
             ))}
           </ul>
@@ -230,7 +231,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
                 type="button"
                 disabled={busy}
                 onClick={() => lookup(option.id)}
-                className="card w-full p-4 text-left transition-colors hover:border-olive disabled:opacity-60"
+                className="card w-full p-4 text-left transition-colors hover:border-marigold disabled:opacity-60"
               >
                 {option.displayName}
               </button>
@@ -317,7 +318,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
         </p>
       </div>
 
-      <div className="diamond my-10" />
+      <Ornament className="my-10" />
 
       <form onSubmit={submit} className="space-y-8">
         {members.map((draft) => {
@@ -366,7 +367,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
                             <label className="flex items-start gap-3 cursor-pointer">
                               <input
                                 type="checkbox"
-                                className="mt-1 accent-olive"
+                                className="mt-1 accent-marigold"
                                 checked={draft.events.includes(event.id)}
                                 onChange={(e) =>
                                   updateMember(draft.guestId, {

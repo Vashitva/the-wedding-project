@@ -1,6 +1,6 @@
 /**
- * Generates the default landing backdrop: dusk over a meadow, with festoon
- * lights strung through the foreground.
+ * Generates the default landing backdrop: dusk over a meadow, with marigold
+ * garlands strung across the top and diyas burning along the ridge.
  *
  * It is painted, not photographed — deliberately soft and abstract, so it reads
  * as atmosphere rather than as a picture of somewhere that isn't your venue.
@@ -51,13 +51,19 @@ const random = mulberry32(20270515);
 
 /* ── Palette ─────────────────────────────────────────────────────────── */
 
-const SKY_TOP = [10, 14, 16];
-const SKY_MID = [22, 31, 30];
-const SKY_HORIZON = [74, 62, 42];
-const GLOW = [214, 158, 86];
-const HILL_FAR = [17, 23, 20];
-const HILL_NEAR = [8, 11, 10];
-const LIGHT = [255, 226, 170];
+const SKY_TOP = [22, 11, 18];
+const SKY_MID = [58, 24, 28];
+const SKY_HORIZON = [116, 55, 30];
+const GLOW = [232, 146, 60];
+const HILL_FAR = [30, 15, 14];
+const HILL_NEAR = [14, 7, 7];
+
+// Genda phool: saffron at the edge of each bloom, turmeric at the centre.
+const MARIGOLD_DEEP = [196, 78, 16];
+const MARIGOLD = [232, 126, 26];
+const MARIGOLD_CORE = [248, 190, 70];
+const LEAF = [46, 58, 32];
+const FLAME = [255, 178, 92];
 
 const HORIZON = 0.7; // as a fraction of height
 
@@ -72,61 +78,105 @@ function ridge(u, { amp, freq, phase, base }) {
   return base + a * amp;
 }
 
-/* ── Festoon lights ──────────────────────────────────────────────────── */
+/* ── Marigold garlands ───────────────────────────────────────────────── */
 
-/**
- * Bulbs hung along catenary strings across the upper frame. Each is a soft
- * radial bloom rather than a hard disc — they are meant to sit out of focus.
- */
 /*
  * Kept in the top fifth of the frame. On a phone the image is cropped hard to
  * a tall aspect, which flattens these curves towards horizontal — any lower and
- * the wires saw straight through the couple's names.
+ * the garlands saw straight through the couple's names.
  */
 const STRINGS = [
-  { y: 0.018, sag: 0.115, count: 14, size: 0.7, tilt: 0.018 },
-  { y: 0.052, sag: 0.15, count: 12, size: 0.95, tilt: -0.03 },
-  { y: 0.012, sag: 0.205, count: 10, size: 1.25, tilt: 0.042 },
+  { y: 0.014, sag: 0.11, size: 0.72, tilt: 0.018 },
+  { y: 0.042, sag: 0.122, size: 0.95, tilt: -0.03 },
+  { y: 0.006, sag: 0.163, size: 1.22, tilt: 0.042 },
 ];
 
-/** Height of a string's wire at horizontal position t (0…1). */
-function wireY(string, t) {
+/** Height of a garland's thread at horizontal position t (0…1). */
+function threadY(string, t) {
   // Catenary approximated by a parabola between the two anchor points.
   return string.y + string.sag * 4 * t * (1 - t) + string.tilt * t;
 }
 
-function buildLights() {
-  const lights = [];
+/** Blooms packed tightly enough along each thread to read as one garland. */
+function buildBlooms() {
+  const blooms = [];
 
   for (const string of STRINGS) {
-    for (let i = 0; i < string.count; i++) {
-      // Uneven spacing — hand-hung lights are never on a perfect pitch.
-      const t = (i + 0.5) / string.count + (random() - 0.5) * 0.02;
-      lights.push({
+    const radius = 0.0105 * string.size;
+    const spacing = radius * 0.95;
+    const count = Math.round(1 / spacing);
+
+    for (let i = 0; i < count; i++) {
+      const t = (i + 0.5) / count;
+      blooms.push({
         x: t * 1.08 - 0.04,
-        // Bulbs hang a little below the wire they're clipped to.
-        y: wireY(string, t) + 0.012 * string.size,
-        radius: (0.011 + random() * 0.008) * string.size,
-        intensity: 0.55 + random() * 0.45,
+        // Blooms sit just under the thread they are tied to.
+        y: threadY(string, t) + radius * 0.5 + (random() - 0.5) * radius * 0.9,
+        // Hand-strung: no two the same size.
+        radius: radius * (0.7 + random() * 0.62),
+        // Some catch the light, some sit in shadow.
+        tone: random(),
       });
     }
   }
 
-  return lights;
+  return blooms;
 }
 
-const lights = buildLights();
+const blooms = buildBlooms();
 
-/** Coverage of the wires at a point, so the bulbs read as strung, not scattered. */
-function wireCoverage(u, v) {
+/* ── Diyas ───────────────────────────────────────────────────────────── */
+
+/** Oil lamps set along the near ridge, receding towards the horizon. */
+function buildDiyas() {
+  const diyas = [];
+
+  for (let i = 0; i < 17; i++) {
+    const t = (i + 0.5) / 17 + (random() - 0.5) * 0.03;
+    diyas.push({
+      x: t,
+      // Scattered across the slope rather than lined up on one contour.
+      y: HORIZON + 0.05 + random() * 0.055,
+      radius: 0.0035 + random() * 0.0035,
+      intensity: 0.6 + random() * 0.4,
+    });
+  }
+
+  return diyas;
+}
+
+const diyas = buildDiyas();
+
+/*
+ * Both garlands and diyas are looked up per pixel, and there are far too many
+ * to test them all every time. Bucketing them by pixel column turns the inner
+ * loop from ~250 candidates into a handful.
+ */
+function bucketByColumn(items, reachMultiplier) {
+  const columns = Array.from({ length: WIDTH }, () => []);
+
+  for (const item of items) {
+    const reach = item.radius * reachMultiplier;
+    const from = Math.max(0, Math.floor((item.x - reach) * WIDTH));
+    const to = Math.min(WIDTH - 1, Math.ceil((item.x + reach) * WIDTH));
+    for (let column = from; column <= to; column++) columns[column].push(item);
+  }
+
+  return columns;
+}
+
+const bloomColumns = bucketByColumn(blooms, 1.6);
+const diyaColumns = bucketByColumn(diyas, 7);
+
+/** Coverage of the threads, so the blooms read as strung, not scattered. */
+function threadCoverage(u, v) {
   let coverage = 0;
 
   for (const string of STRINGS) {
     const t = (u + 0.04) / 1.08;
     if (t < -0.02 || t > 1.02) continue;
-    const d = Math.abs(v - wireY(string, t));
-    // ~1.5px of soft line at this canvas height.
-    coverage = Math.max(coverage, 1 - smoothstep(0, 0.0022, d));
+    const d = Math.abs(v - threadY(string, t));
+    coverage = Math.max(coverage, 1 - smoothstep(0, 0.0018, d));
   }
 
   return coverage;
@@ -156,23 +206,34 @@ for (let py = 0; py < HEIGHT; py++) {
     const glow = Math.exp(-(gx * gx + gy * gy) * 1.6);
     colour = mix(colour, GLOW, clamp01(glow * 0.62));
 
-    // The wires first, so the bulbs sit on top of them.
-    const wire = wireCoverage(u, v);
-    if (wire > 0) {
-      colour = mix(colour, [58, 50, 40], wire * 0.75);
+    // The threads first, so the blooms sit on top of them.
+    const thread = threadCoverage(u, v);
+    if (thread > 0) {
+      colour = mix(colour, LEAF, thread * 0.8);
     }
 
-    // Festoon bulbs and their bloom.
-    for (const light of lights) {
-      const dx = (u - light.x) * (WIDTH / HEIGHT);
-      const dy = v - light.y;
-      const d2 = dx * dx + dy * dy;
-      const r = light.radius;
-      if (d2 < r * r * 36) {
-        const bloom = Math.exp(-d2 / (r * r * 0.5)) * light.intensity;
-        const core = Math.exp(-d2 / (r * r * 0.06)) * light.intensity;
-        colour = mix(colour, LIGHT, clamp01(bloom * 0.5 + core * 0.85));
-      }
+    /*
+     * Marigold blooms. Each is a solid flower rather than a glow: saffron at
+     * the rim, turmeric at the centre, with a soft edge so it stays out of
+     * focus at this scale.
+     */
+    for (const flower of bloomColumns[px]) {
+      const dx = (u - flower.x) * (WIDTH / HEIGHT);
+      const dy = v - flower.y;
+      const d = Math.hypot(dx, dy);
+      if (d > flower.radius * 1.6) continue;
+
+      const cover = 1 - smoothstep(flower.radius * 0.45, flower.radius * 1.1, d);
+      if (cover <= 0) continue;
+
+      // Radially graded petals, darkest at the rim.
+      const toCentre = 1 - clamp01(d / (flower.radius * 1.05));
+      let petal = mix(MARIGOLD_DEEP, MARIGOLD, smoothstep(0, 0.55, toCentre));
+      petal = mix(petal, MARIGOLD_CORE, smoothstep(0.62, 1, toCentre) * 0.85);
+      // Lift the ones catching the last of the light.
+      petal = mix(petal, MARIGOLD_CORE, flower.tone * 0.16);
+
+      colour = mix(colour, petal, cover);
     }
 
     /*
@@ -194,6 +255,22 @@ for (let py = 0; py < HEIGHT; py++) {
     const nearCoverage = smoothstep(nearLine - edge, nearLine + edge, v);
     if (nearCoverage > 0) {
       colour = mix(colour, HILL_NEAR, 0.94 * nearCoverage);
+    }
+
+    /*
+     * Diyas along the slope. Drawn after the ridges so the lamps sit on the
+     * hillside rather than behind it.
+     */
+    for (const diya of diyaColumns[px]) {
+      const dx = (u - diya.x) * (WIDTH / HEIGHT);
+      const dy = v - diya.y;
+      const d2 = dx * dx + dy * dy;
+      const r = diya.radius;
+      if (d2 > r * r * 49) continue;
+
+      const halo = Math.exp(-d2 / (r * r * 4)) * diya.intensity;
+      const flame = Math.exp(-d2 / (r * r * 0.35)) * diya.intensity;
+      colour = mix(colour, FLAME, clamp01(halo * 0.34 + flame * 0.8));
     }
 
     // Corner falloff — the CSS vignette layers on top of this.

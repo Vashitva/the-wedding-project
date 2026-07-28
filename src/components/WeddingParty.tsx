@@ -27,7 +27,7 @@ export default function WeddingParty() {
           <Reveal as="li" key={person.name} delay={i * 70} className="text-center">
             <div
               aria-hidden
-              className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-line bg-paper-raised font-display text-2xl text-olive"
+              className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-line bg-paper-raised font-display text-2xl text-marigold"
             >
               {initials(person.name)}
             </div>

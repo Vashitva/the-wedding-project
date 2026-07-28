@@ -113,9 +113,26 @@ export default function CinematicHero() {
         ref={contentRef}
         className="relative flex h-full flex-col items-center justify-center px-5 text-center will-change-transform"
       >
+        {wedding.hero.script && (
+          <p
+            className="cinema-fade font-script text-2xl text-[color:var(--cinema-gold)] sm:text-3xl"
+            // The garlands sit directly behind this line at some viewport
+            // heights; the halo keeps it legible whatever it lands on.
+            style={{
+              animationDelay: "250ms",
+              textShadow: "0 2px 18px rgba(12, 6, 4, 0.85), 0 0 6px rgba(12, 6, 4, 0.7)",
+            }}
+            lang="hi"
+          >
+            {wedding.hero.script}
+          </p>
+        )}
+
         <p
-          className="eyebrow cinema-fade !text-[color:var(--cinema-ink-soft)]"
-          style={{ animationDelay: "300ms" }}
+          className={`eyebrow cinema-fade !text-[color:var(--cinema-ink-soft)] ${
+            wedding.hero.script ? "mt-5" : ""
+          }`}
+          style={{ animationDelay: "400ms" }}
         >
           {wedding.tagline}
         </p>

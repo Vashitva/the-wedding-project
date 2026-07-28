@@ -14,8 +14,8 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
       {!configured ? (
         <div className="card mt-8 p-6 text-left">
           <p className="text-sm text-ink-soft leading-relaxed">
-            Set <code className="text-olive">ADMIN_PASSWORD</code> in{" "}
-            <code className="text-olive">.env.local</code> and restart the server to
+            Set <code className="text-marigold">ADMIN_PASSWORD</code> in{" "}
+            <code className="text-marigold">.env.local</code> and restart the server to
             open this dashboard.
           </p>
         </div>

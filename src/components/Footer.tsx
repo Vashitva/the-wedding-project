@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { wedding, coupleNames } from "@config/wedding";
 import { formatDate } from "@/lib/format";
+import Ornament from "./Ornament";
 
 export default function Footer() {
   return (
@@ -12,22 +13,22 @@ export default function Footer() {
           {wedding.location.region}
         </p>
 
-        <div className="diamond my-8" />
+        <Ornament className="my-8" />
 
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-          <Link href="/rsvp" className="text-olive hover:text-ink transition-colors">
+          <Link href="/rsvp" className="text-marigold hover:text-ink transition-colors">
             RSVP
           </Link>
           <a
             href={`mailto:${wedding.contact.email}`}
-            className="text-ink-soft hover:text-olive transition-colors"
+            className="text-ink-soft hover:text-marigold transition-colors"
           >
             {wedding.contact.email}
           </a>
           {wedding.contact.phone && (
             <a
               href={`tel:${wedding.contact.phone.replace(/\s/g, "")}`}
-              className="text-ink-soft hover:text-olive transition-colors"
+              className="text-ink-soft hover:text-marigold transition-colors"
             >
               {wedding.contact.phone}
             </a>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter, Tiro_Devanagari_Hindi } from "next/font/google";
 import { wedding, coupleNames } from "@config/wedding";
 import ServiceWorker from "@/components/ServiceWorker";
 import "./globals.css";
@@ -8,6 +8,15 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-cormorant",
+  display: "swap",
+});
+
+// Only used for the optional script line in the hero; Cormorant has no
+// Devanagari coverage, and this pairs with it closely.
+const devanagari = Tiro_Devanagari_Hindi({
+  subsets: ["devanagari"],
+  weight: "400",
+  variable: "--font-devanagari",
   display: "swap",
 });
 
@@ -56,8 +65,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbf8f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#16150f" },
+    { media: "(prefers-color-scheme: light)", color: "#fdf7ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#17100c" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -66,7 +75,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${inter.variable} ${devanagari.variable}`}>
       <body className="min-h-dvh antialiased">
         <a
           href="#main"

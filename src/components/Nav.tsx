@@ -79,7 +79,7 @@ export default function Nav({
                 className={`text-[0.8125rem] transition-colors ${
                   onFrame
                     ? "text-[color:var(--cinema-ink-soft)] hover:text-[color:var(--cinema-gold)]"
-                    : "text-ink-soft hover:text-olive"
+                    : "text-ink-soft hover:text-marigold"
                 }`}
               >
                 {link.label}
@@ -158,7 +158,7 @@ export default function Nav({
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-3 font-display text-2xl text-ink hover:text-olive transition-colors"
+                  className="block py-3 font-display text-2xl text-ink hover:text-marigold transition-colors"
                 >
                   {link.label}
                 </Link>
