@@ -6,6 +6,7 @@ import { wedding } from "@config/wedding";
 import { formatDate } from "@/lib/format";
 import Countdown from "./Countdown";
 import AddToCalendar from "./AddToCalendar";
+import Rangoli from "./Rangoli";
 
 /**
  * The landing: a full-bleed graded frame — backdrop, scrim, vignette, grain —
@@ -113,6 +114,17 @@ export default function CinematicHero() {
         ref={contentRef}
         className="relative flex h-full flex-col items-center justify-center px-5 text-center will-change-transform"
       >
+        {/*
+          Laid behind the names the way a rangoli is laid at a threshold —
+          traced ring by ring while the title comes into focus.
+        */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 w-[34rem] max-w-[125vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.18] text-[color:var(--cinema-gold)] sm:w-[42rem]"
+        >
+          <Rangoli immediate startDelay={0.6} />
+        </div>
+
         {wedding.hero.script && (
           <p
             className="cinema-fade font-script text-2xl text-[color:var(--cinema-gold)] sm:text-3xl"

@@ -457,6 +457,43 @@
   }
 }
 
+/* ── Rangoli ──────────────────────────────────────────────────────────
+ *
+ * Every path is pathLength="1", so one dashoffset transition draws any of
+ * them regardless of their real length. Paths hold at zero-length until the
+ * figure is asked to draw, otherwise a rangoli below the fold would finish
+ * before anyone saw it start.
+ */
+@layer components {
+  .rangoli path {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+
+  .rangoli.is-drawing path {
+    animation: rangoli-draw 1.5s cubic-bezier(0.33, 0.9, 0.35, 1) both;
+  }
+
+  @keyframes rangoli-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Reduced motion gets the finished figure, not a blank square. */
+  @media (prefers-reduced-motion: reduce) {
+    .rangoli path {
+      stroke-dashoffset: 0;
+    }
+    .rangoli.is-drawing path {
+      animation: none;
+    }
+  }
+}
+
 @media print {
   header nav,
   .no-print {

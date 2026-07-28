@@ -53,7 +53,7 @@ The **guest list** is `data/guests.json`. Each entry is one *invitation* (a
   "id": "okafor-family",
   "code": "HAZEL",
   "displayName": "The Okafor Family",
-  "events": ["welcome-drinks", "ceremony", "reception", "farewell-brunch"],
+  "events": ["mehendi", "sangeet", "baraat", "ceremony", "reception"],
   "plusOnesAllowed": 0,
   "members": [
     { "id": "tom-okafor", "firstName": "Tom", "lastName": "Okafor" },
@@ -264,6 +264,42 @@ public/sw.js                Service worker
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run icons` | Regenerate the PWA icons |
 | `npm run hero` | Regenerate the landing backdrop |
+
+---
+
+## The procession
+
+The schedule is not a list. Each function carries its own `palette` in
+`config/wedding.ts` — mehendi green, sangeet indigo, haldi turmeric, baraat
+saffron, the pheras in sindoor and gold, the reception at midnight — and the
+weekend is moved through sideways, one full-bleed panel per function, with the
+ambient glow behind the track following whichever one is in view.
+
+```ts
+palette: { bg: "#12301f", accent: "#9dc46a", ink: "#e8f2dd" },
+```
+
+`bg` has to stay dark enough for `ink` to read on it; `accent` is used for the
+date, the venue link and that function's tick in the position indicator.
+
+It is a native scroll-snap track, so it swipes on a phone, scrolls with a
+trackpad, and takes arrow keys once focused. The prev/next buttons and the tick
+marks are there for everyone else — the ticks double as a jump list.
+
+---
+
+## The rangoli
+
+`src/components/Rangoli.tsx` generates the figure from rotational symmetry —
+a centre bindu, an eight-petal lotus, a twelve-petal middle ring, twenty-four
+paisley scallops and a ring of dots — rather than shipping a drawing. It traces
+itself inside out, the way one is actually laid.
+
+Every path is normalised to `pathLength="1"`, so drawing it is a single
+dashoffset per path with nothing to measure; it works at any size and any
+stroke width. It appears behind the couple's names on the landing and as a
+watermark behind the procession. Reduced motion gets the finished figure
+immediately rather than a blank square.
 
 ---
 

@@ -19,6 +19,13 @@ export type EventItem = {
   dressCode?: string;
   /** Guests only see events their invitation includes. See data/guests.json */
   optional?: boolean;
+  /**
+   * The colour world of this function. Every ritual already has one — mehendi
+   * is green, haldi is turmeric, the pheras are sindoor and gold — and the
+   * schedule moves through them rather than flattening everything to one
+   * palette. `bg` needs to stay dark enough for `ink` to read on it.
+   */
+  palette: { bg: string; accent: string; ink: string };
 };
 
 export type StoryBeat = {
@@ -162,6 +169,7 @@ export const wedding = {
   events: [
     {
       id: "mehendi",
+      palette: { bg: "#12301f", accent: "#9dc46a", ink: "#e8f2dd" },
       name: "Mehendi",
       start: "2027-05-14T15:00:00-04:00",
       end: "2027-05-14T19:00:00-04:00",
@@ -174,6 +182,7 @@ export const wedding = {
     },
     {
       id: "sangeet",
+      palette: { bg: "#241242", accent: "#ff77ab", ink: "#f3e6f6" },
       name: "Sangeet",
       start: "2027-05-14T19:30:00-04:00",
       end: "2027-05-14T23:30:00-04:00",
@@ -185,6 +194,7 @@ export const wedding = {
     },
     {
       id: "haldi",
+      palette: { bg: "#5a3c05", accent: "#ffd166", ink: "#fff4dc" },
       name: "Haldi",
       start: "2027-05-15T09:00:00-04:00",
       end: "2027-05-15T10:30:00-04:00",
@@ -197,6 +207,7 @@ export const wedding = {
     },
     {
       id: "baraat",
+      palette: { bg: "#6b2708", accent: "#ffa445", ink: "#ffeedd" },
       name: "The Baraat",
       start: "2027-05-15T11:00:00-04:00",
       end: "2027-05-15T11:45:00-04:00",
@@ -208,6 +219,7 @@ export const wedding = {
     },
     {
       id: "ceremony",
+      palette: { bg: "#54101f", accent: "#f2c45a", ink: "#ffeade" },
       name: "The Wedding Ceremony",
       start: "2027-05-15T12:00:00-04:00",
       end: "2027-05-15T14:00:00-04:00",
@@ -219,6 +231,7 @@ export const wedding = {
     },
     {
       id: "reception",
+      palette: { bg: "#141225", accent: "#e8b45c", ink: "#f1ebe0" },
       name: "Reception",
       start: "2027-05-15T19:00:00-04:00",
       end: "2027-05-16T01:00:00-04:00",
@@ -230,6 +243,7 @@ export const wedding = {
     },
     {
       id: "farewell-brunch",
+      palette: { bg: "#3d2415", accent: "#f0b27a", ink: "#fbeadb" },
       name: "Farewell Brunch",
       start: "2027-05-16T11:00:00-04:00",
       end: "2027-05-16T14:00:00-04:00",
