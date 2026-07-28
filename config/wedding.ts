@@ -126,6 +126,13 @@ export const wedding = {
     media: {
       /** e.g. "/hero.jpg" in /public, or an external URL. */
       image: "/hero.png",
+      /**
+       * Blooms in front of the lens, drifting faster than the backdrop as you
+       * scroll — this is what gives the landing depth rather than a flat
+       * picture. Needs transparency, and a clear centre where the type sits.
+       * Set to "" to shoot the backdrop straight.
+       */
+      foreground: "/hero-foreground.png",
       /** e.g. "/hero.mp4". Should be silent, a few seconds, and loop cleanly. */
       video: "",
       /** e.g. "/hero-poster.jpg". Required if `video` is set. */

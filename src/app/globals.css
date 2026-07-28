@@ -321,12 +321,16 @@
       );
   }
 
-  /* Vignette in reverse: the edges go paler, not darker. */
+  /*
+   * High-key, but still a vignette: the corners fall to a soft warm grey
+   * rather than to more white, which is what lets the frame read as a frame.
+   */
   .cinema-vignette {
     background-image: radial-gradient(
-      ellipse 78% 72% at 50% 48%,
-      transparent 42%,
-      rgba(255, 254, 253, 0.75) 100%
+      ellipse 74% 68% at 56% 44%,
+      transparent 38%,
+      rgba(126, 114, 116, 0.16) 78%,
+      rgba(108, 96, 99, 0.3) 100%
     );
   }
 
@@ -340,7 +344,7 @@
     /* Oversized and offset so the animated shift never exposes an edge. */
     inset: -150%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.09;
+    opacity: 0.12;
     mix-blend-mode: multiply;
     pointer-events: none;
     animation: grain-shift 0.7s steps(5) infinite;

@@ -1,6 +1,16 @@
 /**
- * Generates the default landing backdrop: a wall of white flowers, thrown out
- * of focus.
+ * Generates the landing's two floral planes:
+ *
+ *   public/hero.png            the backdrop — a wall of white flowers, lit
+ *                              from the upper right and falling into cool
+ *                              shadow at the lower left
+ *   public/hero-foreground.png blooms right up against the lens, wide open and
+ *                              far out of focus, clustered at the edges with
+ *                              the centre left clear for the type
+ *
+ * Rendering them separately is what makes the landing read as a shot rather
+ * than a pattern: the two planes move at different rates as you scroll, so the
+ * frame has real depth rather than a painted-on blur.
  *
  * It is painted, not photographed — deliberately soft and abstract, so it reads
  * as atmosphere rather than as a picture of somewhere that isn't your venue.
@@ -19,6 +29,7 @@ import { encodePng } from "./lib/png.mjs";
 const WIDTH = 1600;
 const HEIGHT = 900;
 const OUT = path.join(process.cwd(), "public", "hero.png");
+const OUT_FOREGROUND = path.join(process.cwd(), "public", "hero-foreground.png");
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -54,7 +65,10 @@ const GROUND_MID = [248, 242, 239];
 const GROUND_LOW = [243, 235, 231];
 
 const PETAL_LIGHT = [255, 255, 254];
-const PETAL_SHADE = [235, 223, 222];
+const PETAL_SHADE = [223, 212, 213];
+// Light from the upper right, shadow falling cool into the lower left.
+const KEY = [255, 250, 240];
+const SHADOW = [156, 156, 176];
 const HEART = [240, 214, 176];
 const BLUSH = [246, 227, 228];
 const LEAF = [205, 216, 199];
@@ -132,92 +146,198 @@ function bucketByColumn(items, reachMultiplier) {
 const leafColumns = bucketByColumn(leaves, 2.2);
 const bloomColumns = bucketByColumn(blooms, 2.2);
 
-/* ── Paint ───────────────────────────────────────────────────────────── */
+/* ── Foreground plane ────────────────────────────────────────────────── */
 
-const pixels = Buffer.alloc(WIDTH * HEIGHT * 3);
-const ASPECT = WIDTH / HEIGHT;
+/**
+ * Blooms pressed right up against the lens: huge, barely shaped, and pushed to
+ * the edges so the middle of the frame stays clear for the names.
+ */
+function buildForeground() {
+  const spots = [
+    { x: 0.04, y: 0.12 }, { x: 0.14, y: -0.04 }, { x: -0.05, y: 0.42 },
+    { x: 0.9, y: 0.08 }, { x: 1.02, y: 0.36 }, { x: 0.82, y: -0.06 },
+    { x: 0.12, y: 0.95 }, { x: 0.36, y: 1.06 }, { x: 0.72, y: 1.02 },
+    { x: 0.96, y: 0.86 }, { x: -0.02, y: 0.76 }, { x: 0.55, y: -0.08 },
+  ];
 
-for (let py = 0; py < HEIGHT; py++) {
-  const v = py / HEIGHT;
-
-  for (let px = 0; px < WIDTH; px++) {
-    const u = px / WIDTH;
-
-    // Ground: near-white, warming very slightly towards the bottom.
-    let colour =
-      v < 0.5
-        ? mix(GROUND_TOP, GROUND_MID, smoothstep(0, 0.5, v))
-        : mix(GROUND_MID, GROUND_LOW, smoothstep(0.5, 1, v));
-
-    for (const leaf of leafColumns[px]) {
-      const dx = (u - leaf.x) * ASPECT;
-      const dy = v - leaf.y;
-      // Rotate into the leaf's own frame, then squash one axis.
-      const lx = dx * Math.cos(leaf.angle) + dy * Math.sin(leaf.angle);
-      const ly = (-dx * Math.sin(leaf.angle) + dy * Math.cos(leaf.angle)) / leaf.squash;
-      const d = Math.hypot(lx, ly);
-      const cover = 1 - smoothstep(leaf.radius * 0.35, leaf.radius * 1.25, d);
-      if (cover > 0) colour = mix(colour, LEAF, cover * 0.5);
-    }
-
-    for (const bloom of bloomColumns[px]) {
-      const dx = (u - bloom.x) * ASPECT;
-      const dy = v - bloom.y;
-      const d = Math.hypot(dx, dy);
-      if (d > bloom.radius * 2) continue;
-
-      const edge = bloom.radius * 0.2 * bloom.softness;
-      const petalOffset = bloom.radius * 0.56;
-      const petalRadius = bloom.radius * 0.47;
-
-      let cover = 0;
-      for (let k = 0; k < bloom.petals; k++) {
-        const a = bloom.phase + (Math.PI * 2 * k) / bloom.petals;
-        const pd = Math.hypot(
-          dx - Math.cos(a) * petalOffset,
-          dy - Math.sin(a) * petalOffset,
-        );
-        cover = Math.max(cover, 1 - smoothstep(petalRadius - edge, petalRadius + edge, pd));
-      }
-      // The heart, filling the gap the petals leave in the middle.
-      cover = Math.max(
-        cover,
-        1 - smoothstep(bloom.radius * 0.24 - edge, bloom.radius * 0.24 + edge, d),
-      );
-      if (cover <= 0) continue;
-
-      // Petals are lightest at the rim and warm towards the heart.
-      const toCentre = 1 - clamp01(d / (bloom.radius * 1.02));
-      let petal = mix(PETAL_LIGHT, PETAL_SHADE, smoothstep(0.15, 0.75, toCentre) * 0.55);
-      if (bloom.blush) petal = mix(petal, BLUSH, 0.4);
-      petal = mix(petal, HEART, smoothstep(0.78, 1, toCentre) * 0.7);
-
-      // Distant blooms sit back into the ground rather than reading as cutouts.
-      colour = mix(colour, mix(petal, colour, bloom.tint), cover);
-    }
-
-    // A soft lift towards the centre, where the type sits.
-    const cx = (u - 0.5) * 2;
-    const cy = (v - 0.45) * 2;
-    const lift = 1 - clamp01((cx * cx + cy * cy) * 0.22);
-    colour = mix(colour, [255, 254, 253], lift * 0.32);
-
-    /*
-     * Dither. Wide near-white gradients band badly at 8 bits per channel, and
-     * on a pale hero the banding is very visible; a little noise breaks it up.
-     */
-    const noise = (random() - 0.5) * 1.1;
-
-    const i = (py * WIDTH + px) * 3;
-    pixels[i] = clamp01((colour[0] + noise) / 255) * 255;
-    pixels[i + 1] = clamp01((colour[1] + noise) / 255) * 255;
-    pixels[i + 2] = clamp01((colour[2] + noise) / 255) * 255;
-  }
+  return spots.map(({ x, y }) => ({
+    x,
+    y,
+    radius: 0.15 + random() * 0.13,
+    petals: [5, 6, 6][Math.floor(random() * 3)],
+    phase: random() * Math.PI * 2,
+    // Wide open, but still recognisably a flower — past about 2.2 the petals
+    // dissolve and the plane reads as fog rather than as blooms.
+    softness: 1.5 + random() * 0.7,
+    tint: 0,
+    blush: random() < 0.7,
+  }));
 }
 
-const png = encodePng(WIDTH, HEIGHT, pixels, { alpha: false });
-writeFileSync(OUT, png);
+const foreground = buildForeground();
+const foregroundColumns = bucketByColumn(foreground, 2.2);
 
+/** Shared petal accumulation, so both planes are lit and shaped identically. */
+function bloomCoverage(bloom, dx, dy, d) {
+  const edge = bloom.radius * 0.2 * bloom.softness;
+  const petalOffset = bloom.radius * 0.56;
+  const petalRadius = bloom.radius * 0.47;
+
+  let cover = 0;
+  for (let k = 0; k < bloom.petals; k++) {
+    const a = bloom.phase + (Math.PI * 2 * k) / bloom.petals;
+    const pd = Math.hypot(
+      dx - Math.cos(a) * petalOffset,
+      dy - Math.sin(a) * petalOffset,
+    );
+    cover = Math.max(cover, 1 - smoothstep(petalRadius - edge, petalRadius + edge, pd));
+  }
+  return Math.max(
+    cover,
+    1 - smoothstep(bloom.radius * 0.24 - edge, bloom.radius * 0.24 + edge, d),
+  );
+}
+
+/** Petal colour at a point, before it is composited. */
+function petalColour(bloom, d, u, v) {
+  const toCentre = 1 - clamp01(d / (bloom.radius * 1.02));
+  let petal = mix(PETAL_LIGHT, PETAL_SHADE, smoothstep(0.15, 0.75, toCentre) * 0.55);
+  if (bloom.blush) petal = mix(petal, BLUSH, 0.4);
+  petal = mix(petal, HEART, smoothstep(0.78, 1, toCentre) * 0.7);
+
+  // Key light from the upper right; the opposite corner falls cool.
+  const lit = clamp01((u * 0.62 + (1 - v) * 0.38));
+  petal = mix(petal, SHADOW, (1 - lit) * 0.54);
+  petal = mix(petal, KEY, smoothstep(0.55, 1, lit) * 0.35);
+  return petal;
+}
+
+/* ── Paint ───────────────────────────────────────────────────────────── */
+
+const ASPECT = WIDTH / HEIGHT;
+
+function paintBackdrop() {
+  const pixels = Buffer.alloc(WIDTH * HEIGHT * 3);
+
+  for (let py = 0; py < HEIGHT; py++) {
+    const v = py / HEIGHT;
+
+    for (let px = 0; px < WIDTH; px++) {
+      const u = px / WIDTH;
+
+      let colour =
+        v < 0.5
+          ? mix(GROUND_TOP, GROUND_MID, smoothstep(0, 0.5, v))
+          : mix(GROUND_MID, GROUND_LOW, smoothstep(0.5, 1, v));
+
+      // The ground carries the same key light, so the planes agree.
+      const lit = clamp01(u * 0.62 + (1 - v) * 0.38);
+      colour = mix(colour, SHADOW, (1 - lit) * 0.58);
+      colour = mix(colour, KEY, smoothstep(0.6, 1, lit) * 0.3);
+
+      for (const leaf of leafColumns[px]) {
+        const dx = (u - leaf.x) * ASPECT;
+        const dy = v - leaf.y;
+        const lx = dx * Math.cos(leaf.angle) + dy * Math.sin(leaf.angle);
+        const ly = (-dx * Math.sin(leaf.angle) + dy * Math.cos(leaf.angle)) / leaf.squash;
+        const cover = 1 - smoothstep(leaf.radius * 0.35, leaf.radius * 1.25, Math.hypot(lx, ly));
+        if (cover > 0) colour = mix(colour, LEAF, cover * 0.5);
+      }
+
+      for (const bloom of bloomColumns[px]) {
+        const dx = (u - bloom.x) * ASPECT;
+        const dy = v - bloom.y;
+        const d = Math.hypot(dx, dy);
+        if (d > bloom.radius * 2) continue;
+
+        const cover = bloomCoverage(bloom, dx, dy, d);
+        if (cover <= 0) continue;
+
+        const petal = petalColour(bloom, d, u, v);
+        colour = mix(colour, mix(petal, colour, bloom.tint), cover);
+      }
+
+      /*
+       * Lift the middle of the frame, where the names sit — the key light
+       * falling on the part of the shot that matters, and what keeps the
+       * backdrop from reading as one flat grey field.
+       */
+      const cx = (u - 0.5) * 2;
+      const cy = (v - 0.45) * 2;
+      const lift = 1 - clamp01((cx * cx + cy * cy) * 0.2);
+      colour = mix(colour, [255, 252, 246], lift * 0.46);
+
+      const noise = (random() - 0.5) * 1.1;
+      const i = (py * WIDTH + px) * 3;
+      pixels[i] = clamp01((colour[0] + noise) / 255) * 255;
+      pixels[i + 1] = clamp01((colour[1] + noise) / 255) * 255;
+      pixels[i + 2] = clamp01((colour[2] + noise) / 255) * 255;
+    }
+  }
+
+  return encodePng(WIDTH, HEIGHT, pixels, { alpha: false });
+}
+
+function paintForeground() {
+  const pixels = Buffer.alloc(WIDTH * HEIGHT * 4);
+
+  for (let py = 0; py < HEIGHT; py++) {
+    const v = py / HEIGHT;
+
+    for (let px = 0; px < WIDTH; px++) {
+      const u = px / WIDTH;
+
+      let colour = [255, 255, 255];
+      let alpha = 0;
+
+      for (const bloom of foregroundColumns[px]) {
+        const dx = (u - bloom.x) * ASPECT;
+        const dy = v - bloom.y;
+        const d = Math.hypot(dx, dy);
+        if (d > bloom.radius * 2.2) continue;
+
+        const cover = bloomCoverage(bloom, dx, dy, d);
+        if (cover <= 0) continue;
+
+        // Out of the key light and closest to the lens, so the near plane
+        // reads a stop or so under the backdrop — which is what separates them.
+        const petal = mix(petalColour(bloom, d, u, v), SHADOW, 0.3);
+        // Nearer blooms paint over further ones rather than averaging.
+        colour = mix(colour, petal, cover / Math.max(alpha + cover, 1e-6));
+        alpha = Math.min(1, alpha + cover * (1 - alpha));
+      }
+
+      /*
+       * Hold the middle of the frame clear. Without this the foreground drifts
+       * across the couple's names as you scroll and the type stops reading.
+       */
+      const cx = (u - 0.5) * 2;
+      const cy = (v - 0.47) * 2;
+      const centre = 1 - smoothstep(0.28, 1.0, Math.hypot(cx * 0.8, cy));
+      alpha *= 1 - centre;
+
+      // Out-of-focus foreground is never fully opaque.
+      alpha *= 0.62;
+
+      const i = (py * WIDTH + px) * 4;
+      pixels[i] = clamp01(colour[0] / 255) * 255;
+      pixels[i + 1] = clamp01(colour[1] / 255) * 255;
+      pixels[i + 2] = clamp01(colour[2] / 255) * 255;
+      pixels[i + 3] = Math.round(clamp01(alpha) * 255);
+    }
+  }
+
+  return encodePng(WIDTH, HEIGHT, pixels, { alpha: true });
+}
+
+const backdrop = paintBackdrop();
+writeFileSync(OUT, backdrop);
 console.log(
-  `wrote public/hero.png (${WIDTH}×${HEIGHT}, ${(png.length / 1024).toFixed(0)} KB)`,
+  `wrote public/hero.png (${WIDTH}×${HEIGHT}, ${(backdrop.length / 1024).toFixed(0)} KB)`,
+);
+
+const front = paintForeground();
+writeFileSync(OUT_FOREGROUND, front);
+console.log(
+  `wrote public/hero-foreground.png (${WIDTH}×${HEIGHT}, ${(front.length / 1024).toFixed(0)} KB)`,
 );

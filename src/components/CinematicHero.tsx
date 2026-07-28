@@ -19,6 +19,7 @@ export default function CinematicHero() {
 
   const contentRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const foregroundRef = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -49,6 +50,10 @@ export default function CinematicHero() {
       }
       if (backdropRef.current) {
         backdropRef.current.style.transform = `translate3d(0, ${y * 0.12}px, 0)`;
+      }
+      // The near plane travels furthest — that difference is the depth.
+      if (foregroundRef.current) {
+        foregroundRef.current.style.transform = `translate3d(0, ${y * -0.22}px, 0) scale(${1 + progress * 0.08})`;
       }
     };
 
@@ -107,6 +112,22 @@ export default function CinematicHero() {
         style={{ opacity: media.scrim }}
       />
       <div aria-hidden className="cinema-vignette absolute inset-0" />
+
+      {/* The near plane sits over the grade but under the grain and the type. */}
+      {media.foreground && (
+        <div
+          ref={foregroundRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 will-change-transform"
+        >
+          <img
+            src={media.foreground}
+            alt=""
+            className="h-full w-full scale-110 object-cover"
+          />
+        </div>
+      )}
+
       <div aria-hidden className="cinema-grain absolute inset-0 overflow-hidden" />
 
       {/* Type ----------------------------------------------------------- */}
@@ -120,7 +141,7 @@ export default function CinematicHero() {
         */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 w-[34rem] max-w-[125vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.3] text-[color:var(--cinema-gold)] sm:w-[42rem]"
+          className="pointer-events-none absolute left-1/2 top-1/2 w-[19rem] max-w-[82vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.22] text-[color:var(--cinema-gold)] sm:w-[34rem] sm:opacity-[0.3] lg:w-[42rem]"
         >
           <Rangoli immediate startDelay={0.6} />
         </div>
