@@ -62,13 +62,14 @@ const random = mulberry32(20270515);
 
 const GROUND_TOP = [253, 250, 249];
 const GROUND_MID = [248, 242, 239];
-const GROUND_LOW = [243, 235, 231];
+const GROUND_LOW = [246, 240, 235];
 
 const PETAL_LIGHT = [255, 255, 254];
 const PETAL_SHADE = [223, 212, 213];
-// Light from the upper right, shadow falling cool into the lower left.
-const KEY = [255, 250, 240];
-const SHADOW = [156, 156, 176];
+// Light from the upper right; the shade it leaves is warm ivory, not grey —
+// a cool shadow on a white page reads as an overcast day rather than as light.
+const KEY = [255, 252, 246];
+const SHADOW = [223, 211, 203];
 const HEART = [240, 214, 176];
 const BLUSH = [246, 227, 228];
 const LEAF = [205, 216, 199];
@@ -207,7 +208,7 @@ function petalColour(bloom, d, u, v) {
 
   // Key light from the upper right; the opposite corner falls cool.
   const lit = clamp01((u * 0.62 + (1 - v) * 0.38));
-  petal = mix(petal, SHADOW, (1 - lit) * 0.54);
+  petal = mix(petal, SHADOW, (1 - lit) * 0.46);
   petal = mix(petal, KEY, smoothstep(0.55, 1, lit) * 0.35);
   return petal;
 }
@@ -232,7 +233,7 @@ function paintBackdrop() {
 
       // The ground carries the same key light, so the planes agree.
       const lit = clamp01(u * 0.62 + (1 - v) * 0.38);
-      colour = mix(colour, SHADOW, (1 - lit) * 0.58);
+      colour = mix(colour, SHADOW, (1 - lit) * 0.52);
       colour = mix(colour, KEY, smoothstep(0.6, 1, lit) * 0.3);
 
       for (const leaf of leafColumns[px]) {
@@ -301,7 +302,7 @@ function paintForeground() {
 
         // Out of the key light and closest to the lens, so the near plane
         // reads a stop or so under the backdrop — which is what separates them.
-        const petal = mix(petalColour(bloom, d, u, v), SHADOW, 0.3);
+        const petal = mix(petalColour(bloom, d, u, v), SHADOW, 0.34);
         // Nearer blooms paint over further ones rather than averaging.
         colour = mix(colour, petal, cover / Math.max(alpha + cover, 1e-6));
         alpha = Math.min(1, alpha + cover * (1 - alpha));

@@ -110,6 +110,11 @@ High-key throughout — nothing here goes near black — but with real tonal ran
 A shadow that only drops a few percent reads as no shadow at all, which is the
 difference between a photograph and a pattern.
 
+The shade the key light leaves is **warm ivory, not grey**. A cool shadow on a
+white page reads as an overcast day rather than as light, and greys the whole
+frame; that is the single value to reach for (`SHADOW` in the generator, plus
+the vignette in `globals.css`) if the landing ever looks murky.
+
 Both planes ship already in place — `public/hero.png` and
 `public/hero-foreground.png`. They are **painted, not photographed** —
 generated together by `scripts/generate-hero.mjs`, deliberately soft and
@@ -328,12 +333,16 @@ a soft sage (`--color-leaf`) and a muted champagne (`--color-gold`) carrying the
 accents. Colour is kept to the flowers and the flourishes; the page itself stays
 white. All of it is defined once at the top of `src/app/globals.css`.
 
-Four faces, and the curves are the point:
+Four faces, and the flourish is the point:
 
 - `--font-script` — **Pinyon Script**, a copperplate, reserved for the couple's
   names and the wordmark. Unreadable at paragraph size, lovely at display size.
-- `--font-display` — **Cormorant Garamond**, set in *italic* for every heading.
-- `--font-body` — **Inter**, left alone to do the reading.
+- `--font-display` — **Italiana**, every heading. An art-nouveau face: high
+  waist, hairline strokes, botanical. It ships one upright weight and no
+  italic, so headings must not be slanted — a synthesised oblique on a face
+  like this looks broken.
+- `--font-body` — **Inter**, left alone to do the reading. The decoration is
+  carried by the two display faces; the paragraphs stay out of the way.
 - `--font-deva` — **Tiro Devanagari Hindi**, only for the optional script line.
 
 The section dividers are an eight-petal lotus (`src/components/Ornament.tsx`)

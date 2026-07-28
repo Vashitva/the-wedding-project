@@ -30,8 +30,8 @@
   /* Curvy by design: a copperplate script for names, an italic serif for
      headings, and a quiet sans left to do the reading. */
   --font-script: var(--font-pinyon), "Snell Roundhand", "Apple Chancery", cursive;
-  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia,
-    "Times New Roman", serif;
+  --font-display: var(--font-italiana), "Cormorant Garamond", Didot, Georgia,
+    serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
   --font-deva: var(--font-devanagari), "Noto Serif Devanagari", serif;
@@ -76,14 +76,19 @@
     text-rendering: optimizeLegibility;
   }
 
+  /*
+   * Italiana ships one upright weight and no italic, so no synthetic slant —
+   * an obliqued art-nouveau face looks broken. Its natural rhythm is wide, and
+   * a little tracking is what makes it sing at display size.
+   */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 300;
-    font-style: italic;
-    letter-spacing: 0;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.015em;
   }
 
   ::selection {
@@ -328,9 +333,9 @@
   .cinema-vignette {
     background-image: radial-gradient(
       ellipse 74% 68% at 56% 44%,
-      transparent 38%,
-      rgba(126, 114, 116, 0.16) 78%,
-      rgba(108, 96, 99, 0.3) 100%
+      transparent 40%,
+      rgba(150, 128, 122, 0.1) 78%,
+      rgba(134, 112, 108, 0.2) 100%
     );
   }
 
@@ -344,7 +349,7 @@
     /* Oversized and offset so the animated shift never exposes an edge. */
     inset: -150%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.12;
+    opacity: 0.1;
     mix-blend-mode: multiply;
     pointer-events: none;
     animation: grain-shift 0.7s steps(5) infinite;

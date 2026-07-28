@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Cormorant_Garamond,
   Inter,
+  Italiana,
   Pinyon_Script,
   Tiro_Devanagari_Hindi,
 } from "next/font/google";
@@ -9,12 +9,12 @@ import { wedding, coupleNames } from "@config/wedding";
 import ServiceWorker from "@/components/ServiceWorker";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+// Every heading. An art-nouveau face — high-waisted, thin-stroked and
+// botanical, which is the floral note carried through the whole page.
+const italiana = Italiana({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  // Headings are set in italic, so that face has to come down too.
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  weight: "400",
+  variable: "--font-italiana",
   display: "swap",
 });
 
@@ -89,7 +89,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${pinyon.variable} ${inter.variable} ${devanagari.variable}`}>
+    <html lang="en" className={`${italiana.variable} ${pinyon.variable} ${inter.variable} ${devanagari.variable}`}>
       <body className="min-h-dvh antialiased">
         <a
           href="#main"
