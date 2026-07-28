@@ -275,7 +275,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
           <input
             id="lookup"
             className="field text-center"
-            placeholder="Nina Lindqvist, or ROWAN"
+            placeholder="Neha Desai, or ROWAN"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoComplete="name"

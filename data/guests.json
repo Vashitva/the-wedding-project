@@ -33,9 +33,9 @@
     ]
   },
   {
-    "id": "lindqvist-nina",
+    "id": "desai-neha",
     "code": "ROWAN",
-    "displayName": "Nina Lindqvist",
+    "displayName": "Neha Desai",
     "events": [
       "mehendi",
       "sangeet",
@@ -48,9 +48,9 @@
     "plusOnesAllowed": 1,
     "members": [
       {
-        "id": "nina-lindqvist",
-        "firstName": "Nina",
-        "lastName": "Lindqvist"
+        "id": "neha-desai",
+        "firstName": "Neha",
+        "lastName": "Desai"
       }
     ]
   },

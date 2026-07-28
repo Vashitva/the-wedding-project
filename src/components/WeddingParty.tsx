@@ -2,7 +2,7 @@ import { wedding } from "@config/wedding";
 import Section from "./Section";
 import Reveal from "./Reveal";
 
-/** Two initials, e.g. "Nina Lindqvist" → "NL". */
+/** Two initials, e.g. "Neha Desai" → "ND". */
 function initials(name: string): string {
   return name
     .split(/\s+/)

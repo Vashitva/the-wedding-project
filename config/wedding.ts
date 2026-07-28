@@ -62,12 +62,12 @@ export type MealChoice = {
 
 export const wedding = {
   /** Shown in the browser tab, share cards and the installed app name. */
-  siteName: "Avery & Rohan",
+  siteName: "Sanjana & Yash",
   tagline: "are getting married",
 
   couple: {
-    partnerOne: { firstName: "Avery", lastName: "Lindqvist" },
-    partnerTwo: { firstName: "Rohan", lastName: "Mehta" },
+    partnerOne: { firstName: "Sanjana", lastName: "Desai" },
+    partnerTwo: { firstName: "Yash", lastName: "Mehta" },
   },
 
   /** The headline date — used by the countdown and the "add to calendar" link. */
@@ -84,16 +84,16 @@ export const wedding = {
   rsvpDeadline: "2027-03-27",
 
   contact: {
-    email: "hello@averyandrohan.example",
+    email: "hello@sanjanaandyash.example",
     /** Optional — leave blank to hide from the FAQ / footer. */
     phone: "",
   },
 
   /** Used for absolute URLs in share cards. Set to your real domain. */
-  siteUrl: "https://averyandrohan.example",
+  siteUrl: "https://sanjanaandyash.example",
 
   hero: {
-    headline: "Avery & Rohan",
+    headline: "Sanjana & Yash",
     subhead: "May 15, 2027 · Hudson Valley, New York",
     invitation:
       "Three days, two families, one mandap in a Hudson Valley meadow, and a great deal of food. We would love for you to be there.",
@@ -135,7 +135,7 @@ export const wedding = {
       {
         date: "October 2019",
         title: "A queue for bad coffee",
-        body: "We met in line at a conference espresso cart that had run out of everything except decaf. Rohan offered Avery his last packet of sugar. Avery does not take sugar, but said yes anyway.",
+        body: "We met in line at a conference espresso cart that had run out of everything except decaf. Yash offered Sanjana the last packet of sugar. Sanjana does not take sugar, but said yes anyway.",
       },
       {
         date: "March 2020",
@@ -150,7 +150,7 @@ export const wedding = {
       {
         date: "June 2026",
         title: "The question",
-        body: "On a hike Rohan had described as 'basically flat', at the top of a hill that was not basically flat, slightly out of breath and entirely sure.",
+        body: "On a hike Yash had described as 'basically flat', at the top of a hill that was not basically flat, slightly out of breath and entirely sure.",
       },
     ] satisfies StoryBeat[],
   },
@@ -203,7 +203,7 @@ export const wedding = {
       venue: "Quarry Road, at the gate",
       address: "884 Quarry Road, Rhinebeck, NY 12572",
       description:
-        "Rohan arrives with a dhol, a procession and no sense of hurry. Everyone is welcome to join — this is the dancing-in-the-road part, and it is the best forty-five minutes of the weekend.",
+        "Yash arrives with a dhol, a procession and no sense of hurry. Everyone is welcome to join — this is the dancing-in-the-road part, and it is the best forty-five minutes of the weekend.",
       dressCode: "Indian formal",
     },
     {
@@ -269,7 +269,7 @@ export const wedding = {
       {
         name: "The Beekman Arms",
         description:
-          "The main block. Rooms held under 'Lindqvist–Mehta' until 27 March.",
+          "The main block. Rooms held under 'Desai–Mehta' until 27 March.",
         distance: "10 min to the barn",
         priceHint: "From $210/night",
         bookingUrl: "https://example.com/beekman",
@@ -318,9 +318,9 @@ export const wedding = {
   ] satisfies MealChoice[],
 
   weddingParty: [
-    { name: "Nina Lindqvist", role: "Maid of Honour", side: "partnerOne", bio: "Avery's sister and lifelong unpaid legal counsel." },
-    { name: "Tom Okafor", role: "Bridesman", side: "partnerOne", bio: "Knows every word of every song Avery pretends not to like." },
-    { name: "Priya Mehta", role: "Best Woman", side: "partnerTwo", bio: "Rohan's cousin, and the reason he owns a suit that fits." },
+    { name: "Neha Desai", role: "Maid of Honour", side: "partnerOne", bio: "Sanjana's sister and lifelong unpaid legal counsel." },
+    { name: "Tom Okafor", role: "Bridesman", side: "partnerOne", bio: "Knows every word of every song Sanjana pretends not to like." },
+    { name: "Priya Mehta", role: "Best Woman", side: "partnerTwo", bio: "Yash's cousin, and the reason there is a suit that fits." },
     { name: "Dev Raman", role: "Groomsman", side: "partnerTwo", bio: "Roommate, 2014–2018. Still hasn't returned the rice cooker." },
   ] satisfies Person[],
 
@@ -355,9 +355,9 @@ export const wedding = {
      * Missing files degrade gracefully to a tinted placeholder.
      */
     photos: [
-      { src: "/gallery/01.jpg", alt: "Avery and Rohan on a beach at dusk" },
-      { src: "/gallery/02.jpg", alt: "The two of us at Nina's wedding" },
-      { src: "/gallery/03.jpg", alt: "Rohan cooking, badly" },
+      { src: "/gallery/01.jpg", alt: "Sanjana and Yash on a beach at dusk" },
+      { src: "/gallery/02.jpg", alt: "The two of us at Neha's wedding" },
+      { src: "/gallery/03.jpg", alt: "Yash cooking, badly" },
       { src: "/gallery/04.jpg", alt: "The hike where it happened" },
       { src: "/gallery/05.jpg", alt: "Our cat, ignoring us" },
       { src: "/gallery/06.jpg", alt: "New Year, three years running" },
@@ -373,7 +373,7 @@ export const wedding = {
     {
       question: "I don't own Indian clothes. Is that a problem?",
       answer:
-        "Not at all — a suit or a smart dress is completely fine, and plenty of guests will be in one. If you would like to wear something Indian, we would love that, and Nina has a list of places in New York and online that rent and deliver. Just ask.",
+        "Not at all — a suit or a smart dress is completely fine, and plenty of guests will be in one. If you would like to wear something Indian, we would love that, and Neha has a list of places in New York and online that rent and deliver. Just ask.",
     },
     {
       question: "Are there colours I should avoid?",
@@ -383,7 +383,7 @@ export const wedding = {
     {
       question: "What actually happens at the baraat?",
       answer:
-        "Rohan arrives at the gate with a dhol player and everyone dances him in. It is loud, it lasts about forty-five minutes, and you are very much invited to join rather than watch. Arrive by 10:45am if you want to be part of it.",
+        "Yash arrives at the gate with a dhol player and everyone dances them in. It is loud, it lasts about forty-five minutes, and you are very much invited to join rather than watch. Arrive by 10:45am if you want to be part of it.",
     },
     {
       question: "How long is the ceremony?",
