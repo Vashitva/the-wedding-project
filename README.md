@@ -62,6 +62,9 @@ Edits to `data/guests.json` are picked up without restarting the server.
 Until the files exist, each tile falls back to a tinted placeholder, so the
 section never looks broken.
 
+**The landing** is a full-bleed cinematic frame — see "The landing" below for
+how to put your own photograph or clip behind it.
+
 **Icons** are generated, not drawn by hand:
 
 ```bash
@@ -69,6 +72,37 @@ npm run icons
 ```
 
 Edit the two colours at the top of `scripts/generate-icons.mjs` to restyle them.
+
+---
+
+## The landing
+
+The first screen is a graded film frame: backdrop, scrim, vignette and moving
+grain, with the names racking into focus like a title card and drifting away as
+you scroll. Everything below it stays editorial — the cut from the frame into
+the paper page is deliberate, and reads as an edit rather than a fade.
+
+Point it at your own media under `hero.media` in `config/wedding.ts`:
+
+```ts
+media: {
+  image: "/hero.jpg",        // or leave blank
+  video: "/hero.mp4",        // silent, short, loops cleanly
+  poster: "/hero-poster.jpg",// required if video is set
+  focalPoint: "50% 45%",     // shift the framing if faces sit high or low
+  scrim: 0.55,               // 0–1, how far the backdrop is darkened
+}
+```
+
+With **neither** set — the default — the hero falls back to a graded
+atmospheric wash, so the page looks finished before you have photographs.
+
+Raise `scrim` if your image is bright and the type starts to fight it; lower it
+if the picture is already dark. `focalPoint` is a plain CSS `object-position`.
+
+Anyone browsing with **reduced motion** gets the same frame with the movement
+removed: no grain flicker, no camera push, no parallax, and a video is replaced
+by its poster frame. Nothing disappears.
 
 ---
 
@@ -161,7 +195,7 @@ data/rsvps.json             Replies (gitignored, created on first RSVP)
 scripts/generate-icons.mjs  PWA icon generator
 
 src/app/
-  page.tsx                  The one-page site
+  page.tsx                  The one-page site (cinematic landing + editorial body)
   rsvp/                     Guest RSVP flow
   admin/                    Password-protected dashboard
   offline/                  Shown with no connection; carries the schedule

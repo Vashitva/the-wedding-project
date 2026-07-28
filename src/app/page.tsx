@@ -1,6 +1,6 @@
 import { wedding } from "@config/wedding";
 import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
+import CinematicHero from "@/components/CinematicHero";
 import Story from "@/components/Story";
 import Schedule from "@/components/Schedule";
 import Travel from "@/components/Travel";
@@ -15,9 +15,9 @@ import RsvpBanner from "@/components/RsvpBanner";
 export default function Home() {
   return (
     <>
-      <Nav title={wedding.siteName} />
+      <Nav title={wedding.siteName} overHero />
       <main id="main">
-        <Hero />
+        <CinematicHero />
         <Story />
         <Schedule />
         <Travel />

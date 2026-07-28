@@ -21,7 +21,14 @@ function remainingUntil(target: number): Remaining | null {
  * client paint so the markup can't mismatch — the clock only exists once
  * hydrated.
  */
-export default function Countdown({ date }: { date: string }) {
+export default function Countdown({
+  date,
+  tone = "page",
+}: {
+  date: string;
+  /** "light" sits the clock on the dark cinematic frame. */
+  tone?: "page" | "light";
+}) {
   const target = new Date(date).getTime();
   const [remaining, setRemaining] = useState<Remaining | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -36,9 +43,15 @@ export default function Countdown({ date }: { date: string }) {
   // Reserve the vertical space so the hero doesn't jump when the clock starts.
   if (!mounted) return <div aria-hidden className="h-[72px]" />;
 
+  const labelClass = tone === "light" ? "eyebrow !text-[color:var(--cinema-ink-soft)]" : "eyebrow";
+
   if (!remaining) {
     return (
-      <p className="font-display text-2xl text-olive">
+      <p
+        className={`font-display text-2xl ${
+          tone === "light" ? "text-[color:var(--cinema-gold)]" : "text-olive"
+        }`}
+      >
         Today&rsquo;s the day.
       </p>
     );
@@ -63,7 +76,7 @@ export default function Countdown({ date }: { date: string }) {
           <div className="font-display text-3xl sm:text-4xl leading-none tabular-nums">
             {String(value).padStart(2, "0")}
           </div>
-          <div className="eyebrow mt-2">{label}</div>
+          <div className={`${labelClass} mt-2`}>{label}</div>
         </div>
       ))}
     </div>

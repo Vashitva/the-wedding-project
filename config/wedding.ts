@@ -93,12 +93,32 @@ export const wedding = {
   siteUrl: "https://averyandrohan.example",
 
   hero: {
-    /** A file in /public, or an external URL. */
-    image: "",
     headline: "Avery & Rohan",
     subhead: "May 15, 2027 · Hudson Valley, New York",
     invitation:
       "Two people, one very long series of coincidences, and a barn with excellent acoustics. We would love for you to be there.",
+
+    /**
+     * The landing is a full-bleed cinematic frame. Drop in a photograph or a
+     * short silent clip and it becomes the backdrop; with neither, the hero
+     * falls back to a graded atmospheric wash that is meant to look
+     * deliberate rather than empty.
+     *
+     * A video needs `poster` too — it is what shows on slow connections,
+     * before playback starts, and for anyone browsing with reduced motion.
+     */
+    media: {
+      /** e.g. "/hero.jpg" in /public, or an external URL. */
+      image: "",
+      /** e.g. "/hero.mp4". Should be silent, a few seconds, and loop cleanly. */
+      video: "",
+      /** e.g. "/hero-poster.jpg". Required if `video` is set. */
+      poster: "",
+      /** CSS object-position — move the framing if faces sit off-centre. */
+      focalPoint: "50% 45%",
+      /** 0–1. How far the backdrop is darkened so the type stays legible. */
+      scrim: 0.55,
+    },
   },
 
   story: {

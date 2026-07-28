@@ -253,6 +253,218 @@
   }
 }
 
+/* ── Cinematic landing ────────────────────────────────────────────────
+ *
+ * The hero is a graded frame: backdrop, scrim, vignette, grain, type. The
+ * palette below is fixed rather than theme-driven — a film frame is dark in
+ * both light and dark mode, and the type sits on the scrim, not on the page.
+ */
+@layer base {
+  /*
+   * Declared at :root, not on .cinema — the fixed header sits outside the hero
+   * element but has to borrow the same palette while it floats over the frame.
+   * Fixed values in both schemes: a film frame is dark either way.
+   */
+  :root {
+    --cinema-ink: #f4efe6;
+    --cinema-ink-soft: #cfc7b8;
+    --cinema-gold: #d8b978;
+    --cinema-line: rgba(207, 199, 184, 0.4);
+    --cinema-cue: rgba(207, 199, 184, 0.5);
+    --cinema-rule: rgba(216, 185, 120, 0.7);
+  }
+}
+
+@layer components {
+  .cinema {
+    background-color: #0d0e0b;
+  }
+
+  /* Primary action on the frame. Gold rather than olive — olive disappears
+     into a dark backdrop, and this picks up the hairlines. */
+  .btn-cinema {
+    background: var(--cinema-gold);
+    color: #14150f;
+  }
+
+  .btn-cinema:hover {
+    background: var(--cinema-ink);
+    color: #14150f;
+  }
+
+  .btn-cinema-ghost {
+    border-color: var(--cinema-line);
+    color: var(--cinema-ink);
+  }
+
+  .btn-cinema-ghost:hover {
+    border-color: var(--cinema-gold);
+    color: var(--cinema-gold);
+  }
+
+  /* Fallback backdrop: dusk behind a hill. Used when no photo or clip is set. */
+  .cinema-atmosphere {
+    background-image:
+      radial-gradient(
+        ellipse 70% 45% at 50% 88%,
+        rgba(216, 185, 120, 0.32),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 55% 40% at 18% 22%,
+        rgba(151, 123, 110, 0.28),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 82% 30%,
+        rgba(74, 92, 78, 0.34),
+        transparent 70%
+      ),
+      linear-gradient(to bottom, #16180f 0%, #0f1210 55%, #0a0b08 100%);
+  }
+
+  /* Darkens the backdrop and weights the bottom, where the type sits. */
+  .cinema-scrim {
+    background-image:
+      linear-gradient(
+        to bottom,
+        rgba(8, 9, 7, 0.55) 0%,
+        rgba(8, 9, 7, 0.15) 30%,
+        rgba(8, 9, 7, 0.45) 70%,
+        rgba(8, 9, 7, 0.85) 100%
+      );
+  }
+
+  .cinema-vignette {
+    background-image: radial-gradient(
+      ellipse 75% 70% at 50% 50%,
+      transparent 40%,
+      rgba(6, 7, 5, 0.72) 100%
+    );
+  }
+
+  /*
+   * Film grain. An inline SVG turbulence tile, shifted a few pixels per frame
+   * so it flickers the way real grain does rather than sitting still.
+   */
+  .cinema-grain::after {
+    content: "";
+    position: absolute;
+    /* Oversized and offset so the animated shift never exposes an edge. */
+    inset: -150%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.16;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    animation: grain-shift 0.7s steps(5) infinite;
+  }
+
+  @keyframes grain-shift {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-3%, 2%); }
+    40% { transform: translate(2%, -3%); }
+    60% { transform: translate(-2%, -2%); }
+    80% { transform: translate(3%, 1%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Slow push on the backdrop — the shot is never quite still. */
+  .cinema-kenburns {
+    animation: ken-burns 28s ease-out both;
+  }
+
+  @keyframes ken-burns {
+    from {
+      transform: scale(1.14) translate3d(0, 1.5%, 0);
+    }
+    to {
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+  }
+
+  /* Title-sequence entrance: rack focus, settle, hold. */
+  .cinema-title {
+    animation: title-in 1900ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  }
+
+  @keyframes title-in {
+    from {
+      opacity: 0;
+      filter: blur(18px);
+      transform: translateY(28px) scale(1.06);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+    }
+  }
+
+  .cinema-fade {
+    animation: cinema-fade 1400ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+  }
+
+  @keyframes cinema-fade {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Hairline that draws itself outward from the centre. */
+  .cinema-rule {
+    animation: rule-draw 1600ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+    transform-origin: center;
+  }
+
+  @keyframes rule-draw {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scroll-cue {
+    0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+    35% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+    65% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+    100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+  }
+
+  .cinema-cue {
+    animation: scroll-cue 2600ms ease-in-out infinite;
+  }
+
+  /*
+   * Reduced motion keeps the frame and drops the movement — the grain flicker,
+   * the push, and the rack focus all go, but nothing disappears.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .cinema-grain::after,
+    .cinema-kenburns,
+    .cinema-cue {
+      animation: none;
+    }
+
+    .cinema-title,
+    .cinema-fade,
+    .cinema-rule {
+      animation: none;
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+}
+
 @media print {
   header nav,
   .no-print {
