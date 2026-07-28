@@ -109,7 +109,7 @@ export const wedding = {
      */
     media: {
       /** e.g. "/hero.jpg" in /public, or an external URL. */
-      image: "",
+      image: "/hero.png",
       /** e.g. "/hero.mp4". Should be silent, a few seconds, and loop cleanly. */
       video: "",
       /** e.g. "/hero-poster.jpg". Required if `video` is set. */

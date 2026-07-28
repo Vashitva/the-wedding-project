@@ -12,7 +12,9 @@ const CACHE_VERSION = "v1";
 const PAGE_CACHE = `pages-${CACHE_VERSION}`;
 const ASSET_CACHE = `assets-${CACHE_VERSION}`;
 
-const PRECACHE = ["/", "/rsvp", "/offline", "/icons/icon-192.png"];
+// The hero backdrop is precached too: it is the landing's whole identity, and
+// an installed app that opens to an empty black frame looks broken.
+const PRECACHE = ["/", "/rsvp", "/offline", "/icons/icon-192.png", "/hero.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
