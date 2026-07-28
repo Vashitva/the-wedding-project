@@ -1,5 +1,5 @@
 /**
- * Generates the PWA icon set — two interlocking gold rings on sindoor red.
+ * Generates the PWA icon set — a six-petal bloom on a dusty rose field.
  *
  * Geometry rather than an image library — see scripts/lib/png.mjs.
  *
@@ -12,55 +12,73 @@ import { encodePng } from "./lib/png.mjs";
 
 const OUT_DIR = path.join(process.cwd(), "public", "icons");
 
-const FIELD = [124, 26, 40];
-const RING = [238, 205, 138];
+const FIELD = [176, 112, 124];
+const PETAL = [255, 253, 252];
+const HEART = [232, 205, 160];
 
 /* ── Drawing ─────────────────────────────────────────────────────────── */
 
-/**
- * Coverage of a ring (annulus) at a point, anti-aliased over one pixel width.
- * Returns 0…1.
- */
-function ringCoverage(x, y, cx, cy, radius, thickness) {
+/** Coverage of a filled disc at a point, anti-aliased over one pixel. */
+function discCoverage(x, y, cx, cy, radius) {
   const d = Math.hypot(x - cx, y - cy);
-  const half = thickness / 2;
-  const edge = Math.abs(d - radius);
-  // Smooth the last pixel of the band rather than hard-clipping it.
-  return Math.max(0, Math.min(1, half + 0.5 - edge));
+  return Math.max(0, Math.min(1, radius + 0.5 - d));
 }
 
+/**
+ * A ring of overlapping round petals about a heart — the same construction as
+ * the flowers in the hero backdrop, so the icon and the landing agree.
+ */
 function drawIcon(size, { padding }) {
   const rgba = Buffer.alloc(size * size * 4);
 
   const inner = size * (1 - padding * 2);
-  const radius = inner * 0.21;
-  const thickness = Math.max(2, inner * 0.055);
-  const cy = size / 2 + inner * 0.02;
-  const offset = radius * 0.78;
-  const cx1 = size / 2 - offset;
-  const cx2 = size / 2 + offset;
+  const centre = size / 2;
+  const petals = 6;
+  const petalOffset = inner * 0.2;
+  const petalRadius = inner * 0.168;
+  const heartRadius = inner * 0.088;
 
   const SS = 3; // 3×3 supersampling
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      let coverage = 0;
+      let petalCover = 0;
+      let heartCover = 0;
 
       for (let sy = 0; sy < SS; sy++) {
         for (let sx = 0; sx < SS; sx++) {
-          const px = x + (sx + 0.5) / SS;
-          const py = y + (sy + 0.5) / SS;
-          const a = ringCoverage(px, py, cx1, cy, radius, thickness);
-          const b = ringCoverage(px, py, cx2, cy, radius, thickness);
-          coverage += Math.max(a, b);
+          const sxp = x + (sx + 0.5) / SS;
+          const syp = y + (sy + 0.5) / SS;
+
+          let best = 0;
+          for (let k = 0; k < petals; k++) {
+            // Rotated a half-step so the bloom sits square in the tile.
+            const a = (Math.PI * 2 * k) / petals - Math.PI / 2;
+            best = Math.max(
+              best,
+              discCoverage(
+                sxp,
+                syp,
+                centre + Math.cos(a) * petalOffset,
+                centre + Math.sin(a) * petalOffset,
+                petalRadius,
+              ),
+            );
+          }
+          petalCover += best;
+          heartCover += discCoverage(sxp, syp, centre, centre, heartRadius);
         }
       }
 
-      coverage = Math.min(1, coverage / (SS * SS));
+      petalCover = Math.min(1, petalCover / (SS * SS));
+      heartCover = Math.min(1, heartCover / (SS * SS));
 
       const i = (y * size + x) * 4;
       for (let c = 0; c < 3; c++) {
-        rgba[i + c] = Math.round(FIELD[c] + (RING[c] - FIELD[c]) * coverage);
+        // Field, then petals, then the heart on top.
+        let value = FIELD[c] + (PETAL[c] - FIELD[c]) * petalCover;
+        value = value + (HEART[c] - value) * heartCover;
+        rgba[i + c] = Math.round(value);
       }
       rgba[i + 3] = 255;
     }

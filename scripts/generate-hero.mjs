@@ -1,6 +1,6 @@
 /**
- * Generates the default landing backdrop: dusk over a meadow, with marigold
- * garlands strung across the top and diyas burning along the ridge.
+ * Generates the default landing backdrop: a wall of white flowers, thrown out
+ * of focus.
  *
  * It is painted, not photographed — deliberately soft and abstract, so it reads
  * as atmosphere rather than as a picture of somewhere that isn't your venue.
@@ -14,7 +14,7 @@ import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { encodePng } from "./lib/png.mjs";
 
-// Sized for the grade it sits under: heavily scrimmed and grained, so this is
+// Sized for the veil it sits under: heavily lightened and grained, so this is
 // plenty even on a large display, and it keeps the first paint light.
 const WIDTH = 1600;
 const HEIGHT = 900;
@@ -23,14 +23,12 @@ const OUT = path.join(process.cwd(), "public", "hero.png");
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
-
 const lerp = (a, b, t) => a + (b - a) * t;
 
 function mix(c1, c2, t) {
   return [lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t)];
 }
 
-/** Hermite ease between two edges. */
 function smoothstep(edge0, edge1, x) {
   const t = clamp01((x - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
@@ -51,71 +49,46 @@ const random = mulberry32(20270515);
 
 /* ── Palette ─────────────────────────────────────────────────────────── */
 
-const SKY_TOP = [22, 11, 18];
-const SKY_MID = [58, 24, 28];
-const SKY_HORIZON = [116, 55, 30];
-const GLOW = [232, 146, 60];
-const HILL_FAR = [30, 15, 14];
-const HILL_NEAR = [14, 7, 7];
+const GROUND_TOP = [253, 250, 249];
+const GROUND_MID = [248, 242, 239];
+const GROUND_LOW = [243, 235, 231];
 
-// Genda phool: saffron at the edge of each bloom, turmeric at the centre.
-const MARIGOLD_DEEP = [196, 78, 16];
-const MARIGOLD = [232, 126, 26];
-const MARIGOLD_CORE = [248, 190, 70];
-const LEAF = [46, 58, 32];
-const FLAME = [255, 178, 92];
+const PETAL_LIGHT = [255, 255, 254];
+const PETAL_SHADE = [235, 223, 222];
+const HEART = [240, 214, 176];
+const BLUSH = [246, 227, 228];
+const LEAF = [205, 216, 199];
 
-const HORIZON = 0.7; // as a fraction of height
+/* ── Blooms ──────────────────────────────────────────────────────────── */
 
-/* ── Terrain ─────────────────────────────────────────────────────────── */
-
-/** Layered sines — a rolling ridge line without needing real noise. */
-function ridge(u, { amp, freq, phase, base }) {
-  const a =
-    Math.sin(u * freq + phase) * 0.55 +
-    Math.sin(u * freq * 2.3 + phase * 1.7) * 0.3 +
-    Math.sin(u * freq * 4.7 + phase * 0.6) * 0.15;
-  return base + a * amp;
-}
-
-/* ── Marigold garlands ───────────────────────────────────────────────── */
-
-/*
- * Kept in the top fifth of the frame. On a phone the image is cropped hard to
- * a tall aspect, which flattens these curves towards horizontal — any lower and
- * the garlands saw straight through the couple's names.
+/**
+ * Each flower is a ring of overlapping round petals around a small heart —
+ * rather than a polar rose, whose sharp minima read as a star rather than a
+ * bloom. Blooms nearer the "camera" are larger and softer-edged, which is what
+ * sells the depth.
  */
-const STRINGS = [
-  { y: 0.014, sag: 0.11, size: 0.72, tilt: 0.018 },
-  { y: 0.042, sag: 0.122, size: 0.95, tilt: -0.03 },
-  { y: 0.006, sag: 0.163, size: 1.22, tilt: 0.042 },
-];
-
-/** Height of a garland's thread at horizontal position t (0…1). */
-function threadY(string, t) {
-  // Catenary approximated by a parabola between the two anchor points.
-  return string.y + string.sag * 4 * t * (1 - t) + string.tilt * t;
-}
-
-/** Blooms packed tightly enough along each thread to read as one garland. */
 function buildBlooms() {
   const blooms = [];
 
-  for (const string of STRINGS) {
-    const radius = 0.0105 * string.size;
-    const spacing = radius * 0.95;
-    const count = Math.round(1 / spacing);
+  // Three planes, back to front.
+  const planes = [
+    { count: 64, min: 0.03, max: 0.055, softness: 0.5, tint: 0.5 },
+    { count: 34, min: 0.06, max: 0.095, softness: 0.8, tint: 0.24 },
+    { count: 14, min: 0.105, max: 0.16, softness: 1.3, tint: 0.08 },
+  ];
 
-    for (let i = 0; i < count; i++) {
-      const t = (i + 0.5) / count;
+  for (const plane of planes) {
+    for (let i = 0; i < plane.count; i++) {
       blooms.push({
-        x: t * 1.08 - 0.04,
-        // Blooms sit just under the thread they are tied to.
-        y: threadY(string, t) + radius * 0.5 + (random() - 0.5) * radius * 0.9,
-        // Hand-strung: no two the same size.
-        radius: radius * (0.7 + random() * 0.62),
-        // Some catch the light, some sit in shadow.
-        tone: random(),
+        x: random() * 1.16 - 0.08,
+        y: random() * 1.2 - 0.1,
+        radius: lerp(plane.min, plane.max, random()),
+        petals: [5, 5, 6, 6, 8][Math.floor(random() * 5)],
+        phase: random() * Math.PI * 2,
+        softness: plane.softness,
+        // Back planes sit further into the ground colour.
+        tint: plane.tint,
+        blush: random() < 0.45,
       });
     }
   }
@@ -125,32 +98,23 @@ function buildBlooms() {
 
 const blooms = buildBlooms();
 
-/* ── Diyas ───────────────────────────────────────────────────────────── */
-
-/** Oil lamps set along the near ridge, receding towards the horizon. */
-function buildDiyas() {
-  const diyas = [];
-
-  for (let i = 0; i < 17; i++) {
-    const t = (i + 0.5) / 17 + (random() - 0.5) * 0.03;
-    diyas.push({
-      x: t,
-      // Scattered across the slope rather than lined up on one contour.
-      y: HORIZON + 0.05 + random() * 0.055,
-      radius: 0.0035 + random() * 0.0035,
-      intensity: 0.6 + random() * 0.4,
-    });
-  }
-
-  return diyas;
+/** Leaves: simple soft ellipses, tucked behind everything else. */
+function buildLeaves() {
+  return Array.from({ length: 34 }, () => ({
+    x: random() * 1.16 - 0.08,
+    y: random() * 1.2 - 0.1,
+    radius: 0.03 + random() * 0.06,
+    angle: random() * Math.PI,
+    squash: 0.28 + random() * 0.18,
+  }));
 }
 
-const diyas = buildDiyas();
+const leaves = buildLeaves();
 
-/*
- * Both garlands and diyas are looked up per pixel, and there are far too many
- * to test them all every time. Bucketing them by pixel column turns the inner
- * loop from ~250 candidates into a handful.
+/**
+ * Both sets are looked up per pixel, and there are far too many to test them
+ * all every time. Bucketing them by pixel column turns the inner loop from
+ * ~120 candidates into a handful.
  */
 function bucketByColumn(items, reachMultiplier) {
   const columns = Array.from({ length: WIDTH }, () => []);
@@ -165,26 +129,13 @@ function bucketByColumn(items, reachMultiplier) {
   return columns;
 }
 
-const bloomColumns = bucketByColumn(blooms, 1.6);
-const diyaColumns = bucketByColumn(diyas, 7);
-
-/** Coverage of the threads, so the blooms read as strung, not scattered. */
-function threadCoverage(u, v) {
-  let coverage = 0;
-
-  for (const string of STRINGS) {
-    const t = (u + 0.04) / 1.08;
-    if (t < -0.02 || t > 1.02) continue;
-    const d = Math.abs(v - threadY(string, t));
-    coverage = Math.max(coverage, 1 - smoothstep(0, 0.0018, d));
-  }
-
-  return coverage;
-}
+const leafColumns = bucketByColumn(leaves, 2.2);
+const bloomColumns = bucketByColumn(blooms, 2.2);
 
 /* ── Paint ───────────────────────────────────────────────────────────── */
 
 const pixels = Buffer.alloc(WIDTH * HEIGHT * 3);
+const ASPECT = WIDTH / HEIGHT;
 
 for (let py = 0; py < HEIGHT; py++) {
   const v = py / HEIGHT;
@@ -192,96 +143,68 @@ for (let py = 0; py < HEIGHT; py++) {
   for (let px = 0; px < WIDTH; px++) {
     const u = px / WIDTH;
 
-    // Sky: night at the top easing down into a warm band at the horizon.
-    let colour;
-    if (v < 0.45) {
-      colour = mix(SKY_TOP, SKY_MID, smoothstep(0, 0.45, v));
-    } else {
-      colour = mix(SKY_MID, SKY_HORIZON, smoothstep(0.45, HORIZON, v));
+    // Ground: near-white, warming very slightly towards the bottom.
+    let colour =
+      v < 0.5
+        ? mix(GROUND_TOP, GROUND_MID, smoothstep(0, 0.5, v))
+        : mix(GROUND_MID, GROUND_LOW, smoothstep(0.5, 1, v));
+
+    for (const leaf of leafColumns[px]) {
+      const dx = (u - leaf.x) * ASPECT;
+      const dy = v - leaf.y;
+      // Rotate into the leaf's own frame, then squash one axis.
+      const lx = dx * Math.cos(leaf.angle) + dy * Math.sin(leaf.angle);
+      const ly = (-dx * Math.sin(leaf.angle) + dy * Math.cos(leaf.angle)) / leaf.squash;
+      const d = Math.hypot(lx, ly);
+      const cover = 1 - smoothstep(leaf.radius * 0.35, leaf.radius * 1.25, d);
+      if (cover > 0) colour = mix(colour, LEAF, cover * 0.5);
     }
 
-    // Afterglow sitting just below the ridge, slightly off-centre.
-    const gx = (u - 0.54) / 0.42;
-    const gy = (v - (HORIZON + 0.02)) / 0.3;
-    const glow = Math.exp(-(gx * gx + gy * gy) * 1.6);
-    colour = mix(colour, GLOW, clamp01(glow * 0.62));
-
-    // The threads first, so the blooms sit on top of them.
-    const thread = threadCoverage(u, v);
-    if (thread > 0) {
-      colour = mix(colour, LEAF, thread * 0.8);
-    }
-
-    /*
-     * Marigold blooms. Each is a solid flower rather than a glow: saffron at
-     * the rim, turmeric at the centre, with a soft edge so it stays out of
-     * focus at this scale.
-     */
-    for (const flower of bloomColumns[px]) {
-      const dx = (u - flower.x) * (WIDTH / HEIGHT);
-      const dy = v - flower.y;
+    for (const bloom of bloomColumns[px]) {
+      const dx = (u - bloom.x) * ASPECT;
+      const dy = v - bloom.y;
       const d = Math.hypot(dx, dy);
-      if (d > flower.radius * 1.6) continue;
+      if (d > bloom.radius * 2) continue;
 
-      const cover = 1 - smoothstep(flower.radius * 0.45, flower.radius * 1.1, d);
+      const edge = bloom.radius * 0.2 * bloom.softness;
+      const petalOffset = bloom.radius * 0.56;
+      const petalRadius = bloom.radius * 0.47;
+
+      let cover = 0;
+      for (let k = 0; k < bloom.petals; k++) {
+        const a = bloom.phase + (Math.PI * 2 * k) / bloom.petals;
+        const pd = Math.hypot(
+          dx - Math.cos(a) * petalOffset,
+          dy - Math.sin(a) * petalOffset,
+        );
+        cover = Math.max(cover, 1 - smoothstep(petalRadius - edge, petalRadius + edge, pd));
+      }
+      // The heart, filling the gap the petals leave in the middle.
+      cover = Math.max(
+        cover,
+        1 - smoothstep(bloom.radius * 0.24 - edge, bloom.radius * 0.24 + edge, d),
+      );
       if (cover <= 0) continue;
 
-      // Radially graded petals, darkest at the rim.
-      const toCentre = 1 - clamp01(d / (flower.radius * 1.05));
-      let petal = mix(MARIGOLD_DEEP, MARIGOLD, smoothstep(0, 0.55, toCentre));
-      petal = mix(petal, MARIGOLD_CORE, smoothstep(0.62, 1, toCentre) * 0.85);
-      // Lift the ones catching the last of the light.
-      petal = mix(petal, MARIGOLD_CORE, flower.tone * 0.16);
+      // Petals are lightest at the rim and warm towards the heart.
+      const toCentre = 1 - clamp01(d / (bloom.radius * 1.02));
+      let petal = mix(PETAL_LIGHT, PETAL_SHADE, smoothstep(0.15, 0.75, toCentre) * 0.55);
+      if (bloom.blush) petal = mix(petal, BLUSH, 0.4);
+      petal = mix(petal, HEART, smoothstep(0.78, 1, toCentre) * 0.7);
 
-      colour = mix(colour, petal, cover);
+      // Distant blooms sit back into the ground rather than reading as cutouts.
+      colour = mix(colour, mix(petal, colour, bloom.tint), cover);
     }
 
-    /*
-     * Ridges. Both edges are feathered over a pixel rather than thresholded —
-     * a hard edge here stair-steps badly once the browser scales the image up
-     * to fill a phone screen.
-     */
-    const edge = 0.8 / HEIGHT;
-
-    const farLine = ridge(u, { amp: 0.034, freq: 6.4, phase: 1.3, base: HORIZON });
-    const farCoverage = smoothstep(farLine - edge, farLine + edge, v);
-    if (farCoverage > 0) {
-      const depth = smoothstep(farLine, farLine + 0.06, v);
-      colour = mix(colour, HILL_FAR, (0.82 + depth * 0.18) * farCoverage);
-    }
-
-    // Near ridge, darker and higher-contrast against the glow.
-    const nearLine = ridge(u, { amp: 0.052, freq: 3.3, phase: 4.1, base: HORIZON + 0.13 });
-    const nearCoverage = smoothstep(nearLine - edge, nearLine + edge, v);
-    if (nearCoverage > 0) {
-      colour = mix(colour, HILL_NEAR, 0.94 * nearCoverage);
-    }
-
-    /*
-     * Diyas along the slope. Drawn after the ridges so the lamps sit on the
-     * hillside rather than behind it.
-     */
-    for (const diya of diyaColumns[px]) {
-      const dx = (u - diya.x) * (WIDTH / HEIGHT);
-      const dy = v - diya.y;
-      const d2 = dx * dx + dy * dy;
-      const r = diya.radius;
-      if (d2 > r * r * 49) continue;
-
-      const halo = Math.exp(-d2 / (r * r * 4)) * diya.intensity;
-      const flame = Math.exp(-d2 / (r * r * 0.35)) * diya.intensity;
-      colour = mix(colour, FLAME, clamp01(halo * 0.34 + flame * 0.8));
-    }
-
-    // Corner falloff — the CSS vignette layers on top of this.
+    // A soft lift towards the centre, where the type sits.
     const cx = (u - 0.5) * 2;
-    const cy = (v - 0.5) * 2;
-    const vignette = 1 - clamp01((cx * cx + cy * cy) * 0.24);
-    colour = [colour[0] * vignette, colour[1] * vignette, colour[2] * vignette];
+    const cy = (v - 0.45) * 2;
+    const lift = 1 - clamp01((cx * cx + cy * cy) * 0.22);
+    colour = mix(colour, [255, 254, 253], lift * 0.32);
 
     /*
-     * Dither. Wide smooth gradients band badly at 8 bits per channel, and the
-     * banding is very visible on a dark hero; a little noise breaks it up.
+     * Dither. Wide near-white gradients band badly at 8 bits per channel, and
+     * on a pale hero the banding is very visible; a little noise breaks it up.
      */
     const noise = (random() - 0.5) * 1.1;
 

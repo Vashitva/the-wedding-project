@@ -177,7 +177,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
             {stage.rsvp.responses.map((r) => (
               <li key={r.guestId} className="flex items-baseline justify-between gap-4">
                 <span>{r.name}</span>
-                <span className={r.attending ? "text-marigold text-sm" : "text-ink-faint text-sm"}>
+                <span className={r.attending ? "text-bloom text-sm" : "text-ink-faint text-sm"}>
                   {r.attending
                     ? r.events.map(eventName).join(", ")
                     : "Not able to come"}
@@ -187,7 +187,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
             {plus.map((p) => (
               <li key={p.name} className="flex items-baseline justify-between gap-4">
                 <span>{p.name}</span>
-                <span className="text-marigold text-sm">Coming</span>
+                <span className="text-bloom text-sm">Coming</span>
               </li>
             ))}
           </ul>
@@ -231,7 +231,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
                 type="button"
                 disabled={busy}
                 onClick={() => lookup(option.id)}
-                className="card w-full p-4 text-left transition-colors hover:border-marigold disabled:opacity-60"
+                className="card w-full p-4 text-left transition-colors hover:border-bloom disabled:opacity-60"
               >
                 {option.displayName}
               </button>
@@ -367,7 +367,7 @@ export default function RsvpFlow({ open }: { open: boolean }) {
                             <label className="flex items-start gap-3 cursor-pointer">
                               <input
                                 type="checkbox"
-                                className="mt-1 accent-marigold"
+                                className="mt-1 accent-bloom"
                                 checked={draft.events.includes(event.id)}
                                 onChange={(e) =>
                                   updateMember(draft.guestId, {

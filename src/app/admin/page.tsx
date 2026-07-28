@@ -83,7 +83,7 @@ export default async function AdminPage() {
             {stats.perEvent.map((e) => (
               <li key={e.eventId} className="flex justify-between px-5 py-3">
                 <span>{e.name}</span>
-                <span className="tabular-nums text-marigold">{e.attending}</span>
+                <span className="tabular-nums text-bloom">{e.attending}</span>
               </li>
             ))}
           </ul>
@@ -95,7 +95,7 @@ export default async function AdminPage() {
             {stats.perMeal.map((m) => (
               <li key={m.mealId} className="flex justify-between px-5 py-3">
                 <span>{m.name}</span>
-                <span className="tabular-nums text-marigold">{m.count}</span>
+                <span className="tabular-nums text-bloom">{m.count}</span>
               </li>
             ))}
           </ul>
@@ -146,7 +146,7 @@ export default async function AdminPage() {
                   <ul className="space-y-1.5">
                     {rsvp.responses.map((r) => (
                       <li key={r.guestId} className="flex flex-wrap gap-x-3">
-                        <span className={r.attending ? "text-marigold" : "text-ink-faint"}>
+                        <span className={r.attending ? "text-bloom" : "text-ink-faint"}>
                           {r.attending ? "✓" : "✕"}
                         </span>
                         <span>{r.name}</span>
@@ -164,7 +164,7 @@ export default async function AdminPage() {
                     ))}
                     {rsvp.plusOnes.map((p) => (
                       <li key={p.name} className="flex flex-wrap gap-x-3">
-                        <span className="text-marigold">✓</span>
+                        <span className="text-bloom">✓</span>
                         <span>{p.name}</span>
                         <span className="text-ink-faint">
                           plus one
@@ -180,7 +180,7 @@ export default async function AdminPage() {
                     <div className="flex gap-2">
                       <dt className="text-ink-faint">Email:</dt>
                       <dd>
-                        <a href={`mailto:${rsvp.email}`} className="hover:text-marigold">
+                        <a href={`mailto:${rsvp.email}`} className="hover:text-bloom">
                           {rsvp.email}
                         </a>
                       </dd>
@@ -245,7 +245,7 @@ export default async function AdminPage() {
       )}
 
       <p className="mt-12 text-center text-sm">
-        <Link href="/" className="text-ink-faint hover:text-marigold">
+        <Link href="/" className="text-ink-faint hover:text-bloom">
           ← Back to the site
         </Link>
       </p>

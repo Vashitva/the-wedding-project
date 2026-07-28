@@ -13,19 +13,9 @@ const links = [
   { href: "/#faq", label: "FAQ" },
 ];
 
-export default function Nav({
-  title,
-  overHero = false,
-}: {
-  title: string;
-  /** Set on pages that open with the dark cinematic frame behind the header. */
-  overHero?: boolean;
-}) {
+export default function Nav({ title }: { title: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-
-  // Light type only while the header actually sits on the dark frame.
-  const onFrame = overHero && !scrolled && !open;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -63,9 +53,7 @@ export default function Nav({
       >
         <Link
           href="/"
-          className={`font-display text-lg tracking-wide transition-colors ${
-            onFrame ? "text-[color:var(--cinema-ink)]" : ""
-          }`}
+          className="font-script text-[1.7rem] leading-none"
           onClick={() => setOpen(false)}
         >
           {title}
@@ -76,11 +64,7 @@ export default function Nav({
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`text-[0.8125rem] transition-colors ${
-                  onFrame
-                    ? "text-[color:var(--cinema-ink-soft)] hover:text-[color:var(--cinema-gold)]"
-                    : "text-ink-soft hover:text-marigold"
-                }`}
+                className="text-[0.8125rem] text-ink-soft transition-colors hover:text-bloom"
               >
                 {link.label}
               </Link>
@@ -89,11 +73,7 @@ export default function Nav({
           <li>
             <Link
               href="/rsvp"
-              className={
-                onFrame
-                  ? "btn !py-2.5 !px-5 border-[color:var(--cinema-line)] text-[color:var(--cinema-ink)] hover:border-[color:var(--cinema-gold)] hover:text-[color:var(--cinema-gold)]"
-                  : "btn btn-primary !py-2.5 !px-5"
-              }
+              className="btn btn-primary !py-2.5 !px-5"
             >
               RSVP
             </Link>
@@ -103,11 +83,7 @@ export default function Nav({
         <div className="flex items-center gap-3 lg:hidden">
           <Link
             href="/rsvp"
-            className={
-              onFrame
-                ? "btn !py-2 !px-4 text-[0.6875rem] border-[color:var(--cinema-line)] text-[color:var(--cinema-ink)]"
-                : "btn btn-primary !py-2 !px-4 text-[0.6875rem]"
-            }
+            className="btn btn-primary !py-2 !px-4 text-[0.6875rem]"
           >
             RSVP
           </Link>
@@ -121,23 +97,17 @@ export default function Nav({
           >
             <span className="block w-6 space-y-[5px]">
               <span
-                className={`block h-px ${
-                  onFrame ? "bg-[color:var(--cinema-ink)]" : "bg-ink"
-                } transition-transform duration-300 ${
+                className={`block h-px bg-ink transition-transform duration-300 ${
                   open ? "translate-y-[6px] rotate-45" : ""
                 }`}
               />
               <span
-                className={`block h-px ${
-                  onFrame ? "bg-[color:var(--cinema-ink)]" : "bg-ink"
-                } transition-opacity duration-200 ${
+                className={`block h-px bg-ink transition-opacity duration-200 ${
                   open ? "opacity-0" : ""
                 }`}
               />
               <span
-                className={`block h-px ${
-                  onFrame ? "bg-[color:var(--cinema-ink)]" : "bg-ink"
-                } transition-transform duration-300 ${
+                className={`block h-px bg-ink transition-transform duration-300 ${
                   open ? "-translate-y-[6px] -rotate-45" : ""
                 }`}
               />
@@ -158,7 +128,7 @@ export default function Nav({
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-3 font-display text-2xl text-ink hover:text-marigold transition-colors"
+                  className="block py-3 font-display text-2xl text-ink transition-colors hover:text-bloom"
                 >
                   {link.label}
                 </Link>

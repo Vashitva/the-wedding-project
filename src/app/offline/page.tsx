@@ -29,7 +29,7 @@ export default function OfflinePage() {
 
       {days.map((day) => (
         <div key={day.key} className="mb-10">
-          <h2 className="font-display text-2xl text-marigold">{day.label}</h2>
+          <h2 className="font-display text-2xl text-bloom">{day.label}</h2>
           <div className="rule mt-3 mb-5" />
           <ul className="space-y-5">
             {day.events.map((event) => (

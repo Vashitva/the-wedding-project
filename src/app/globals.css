@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /*
- * Palette drawn from an Indian wedding: marigold (genda) for accents, sindoor
- * red for the deepest notes, gold for rules and flourishes, on a warm
- * haldi-tinted ivory. Saturated in the ornament, restrained in the text.
+ * White floral: near-white paper throughout, with a dusty rose and a soft sage
+ * carrying the accents and a muted champagne for rules. Colour is kept to the
+ * flowers and the flourishes — the page itself stays white.
  */
 /*
  * `@theme` registers the palette and generates the utilities. It is always
@@ -12,50 +12,41 @@
  * on :root below, which the generated `var(--color-*)` utilities pick up.
  */
 @theme {
-  --color-paper: #fdf7ec;
-  --color-paper-raised: #fffdf8;
-  --color-paper-sunk: #f8ecda;
-  --color-ink: #2b1710;
-  --color-ink-soft: #6a4a3c;
-  --color-ink-faint: #9c7f6f;
-  --color-marigold: #b8531f;
-  --color-marigold-soft: #d9812c;
-  --color-sindoor: #8c1d2c;
-  --color-gold: #a9822f;
-  --color-line: #ecdcc4;
-  --color-blush: #f0cdb4;
-  /* Text that sits on a marigold fill. */
-  --color-on-marigold: #fffaf2;
+  --color-paper: #fffefd;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunk: #f9f6f2;
+  --color-ink: #33292b;
+  --color-ink-soft: #6f6266;
+  --color-ink-faint: #a49a9c;
+  --color-bloom: #b0707c;
+  --color-bloom-soft: #cf98a2;
+  --color-leaf: #7d8f74;
+  --color-gold: #bda87f;
+  --color-line: #ece5e0;
+  --color-blush: #f7e8e8;
+  /* Text that sits on a bloom fill. */
+  --color-on-bloom: #fffefd;
 
+  /* Curvy by design: a copperplate script for names, an italic serif for
+     headings, and a quiet sans left to do the reading. */
+  --font-script: var(--font-pinyon), "Snell Roundhand", "Apple Chancery", cursive;
   --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia,
     "Times New Roman", serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
-  --font-script: var(--font-devanagari), "Noto Serif Devanagari", serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: #17100c;
-    --color-paper-raised: #211711;
-    --color-paper-sunk: #120b08;
-    --color-ink: #f6ece0;
-    --color-ink-soft: #d0b8a5;
-    --color-ink-faint: #a08a79;
-    --color-marigold: #e89448;
-    --color-marigold-soft: #d07c33;
-    --color-sindoor: #c9505f;
-    --color-gold: #d9ac5c;
-    --color-line: #3a2820;
-    --color-blush: #7a4436;
-    /* The marigold lightens in the dark scheme, so its label has to darken. */
-    --color-on-marigold: #2b1710;
-  }
+  --font-deva: var(--font-devanagari), "Noto Serif Devanagari", serif;
 }
 
 @layer base {
+  /*
+   * Light only, on purpose. The whole design is a white floral page — the
+   * backdrop is pale flowers, the panels are pale washes, the ornament is a
+   * line drawing. Inverting all of that to near-black would not be the same
+   * site with the lights off, it would be a different one, and the header
+   * floating over a permanently pale hero had no legible dark treatment.
+   */
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
   }
 
   html {
@@ -91,7 +82,8 @@
   h4 {
     font-family: var(--font-display);
     font-weight: 300;
-    letter-spacing: -0.01em;
+    font-style: italic;
+    letter-spacing: 0;
   }
 
   ::selection {
@@ -100,7 +92,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-marigold);
+    outline: 2px solid var(--color-bloom);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -149,8 +141,8 @@
   }
 
   .btn-primary {
-    background: var(--color-marigold);
-    color: var(--color-on-marigold);
+    background: var(--color-bloom);
+    color: var(--color-on-bloom);
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -169,8 +161,8 @@
   }
 
   .btn-ghost:hover {
-    border-color: var(--color-marigold);
-    color: var(--color-marigold);
+    border-color: var(--color-bloom);
+    color: var(--color-bloom);
   }
 
   .field {
@@ -188,7 +180,7 @@
   }
 
   .field:focus {
-    border-color: var(--color-marigold);
+    border-color: var(--color-bloom);
     outline-offset: 0;
   }
 
@@ -245,11 +237,11 @@
   }
 }
 
-/* ── Cinematic landing ────────────────────────────────────────────────
+/* ── The landing frame ────────────────────────────────────────────────
  *
- * The hero is a graded frame: backdrop, scrim, vignette, grain, type. The
- * palette below is fixed rather than theme-driven — a film frame is dark in
- * both light and dark mode, and the type sits on the scrim, not on the page.
+ * Backdrop, veil, vignette, grain, type — but white rather than cinematic.
+ * The palette is fixed rather than theme-driven: the flowers behind the type
+ * are pale in both schemes, so the type on top has to stay dark in both.
  */
 @layer base {
   /*
@@ -258,30 +250,28 @@
    * Fixed values in both schemes: a film frame is dark either way.
    */
   :root {
-    --cinema-ink: #fbf1e2;
-    --cinema-ink-soft: #ddc7ad;
-    --cinema-gold: #eab452;
-    --cinema-line: rgba(221, 199, 173, 0.42);
-    --cinema-cue: rgba(221, 199, 173, 0.5);
-    --cinema-rule: rgba(234, 180, 82, 0.75);
+    --cinema-ink: #362a2c;
+    --cinema-ink-soft: #6c5c60;
+    --cinema-gold: #a86773;
+    --cinema-line: rgba(83, 66, 70, 0.28);
+    --cinema-cue: rgba(83, 66, 70, 0.35);
+    --cinema-rule: rgba(168, 103, 115, 0.55);
   }
 }
 
 @layer components {
   .cinema {
-    background-color: #140b07;
+    background-color: #fbf7f5;
   }
 
-  /* Primary action on the frame. Gold rather than marigold — marigold disappears
-     into a dark backdrop, and this picks up the hairlines. */
   .btn-cinema {
     background: var(--cinema-gold);
-    color: #2b1710;
+    color: #fffefd;
   }
 
   .btn-cinema:hover {
     background: var(--cinema-ink);
-    color: #2b1710;
+    color: #fffefd;
   }
 
   .btn-cinema-ghost {
@@ -292,46 +282,51 @@
   .btn-cinema-ghost:hover {
     border-color: var(--cinema-gold);
     color: var(--cinema-gold);
+    background: rgba(255, 255, 255, 0.55);
   }
 
-  /* Fallback backdrop: dusk behind a hill. Used when no photo or clip is set. */
+  /* Fallback backdrop: a pale wash of blush and sage, used when no photo is set. */
   .cinema-atmosphere {
     background-image:
       radial-gradient(
-        ellipse 70% 45% at 50% 88%,
-        rgba(216, 185, 120, 0.32),
+        ellipse 62% 48% at 22% 18%,
+        rgba(232, 200, 203, 0.62),
         transparent 70%
       ),
       radial-gradient(
-        ellipse 55% 40% at 18% 22%,
-        rgba(151, 123, 110, 0.28),
+        ellipse 55% 45% at 82% 26%,
+        rgba(206, 219, 202, 0.5),
         transparent 72%
       ),
       radial-gradient(
-        ellipse 60% 50% at 82% 30%,
-        rgba(74, 92, 78, 0.34),
+        ellipse 70% 50% at 50% 92%,
+        rgba(240, 226, 214, 0.75),
         transparent 70%
       ),
-      linear-gradient(to bottom, #16180f 0%, #0f1210 55%, #0a0b08 100%);
+      linear-gradient(to bottom, #fdfbfa 0%, #f8f2ef 55%, #f4ece8 100%);
   }
 
-  /* Darkens the backdrop and weights the bottom, where the type sits. */
+  /*
+   * A white veil rather than a dark scrim — it lifts the flowers back so the
+   * type reads, without turning the frame grey.
+   */
   .cinema-scrim {
     background-image:
       linear-gradient(
         to bottom,
-        rgba(8, 9, 7, 0.55) 0%,
-        rgba(8, 9, 7, 0.15) 30%,
-        rgba(8, 9, 7, 0.45) 70%,
-        rgba(8, 9, 7, 0.85) 100%
+        rgba(255, 253, 252, 0.62) 0%,
+        rgba(255, 253, 252, 0.34) 28%,
+        rgba(255, 253, 252, 0.6) 68%,
+        rgba(255, 253, 252, 0.88) 100%
       );
   }
 
+  /* Vignette in reverse: the edges go paler, not darker. */
   .cinema-vignette {
     background-image: radial-gradient(
-      ellipse 75% 70% at 50% 50%,
-      transparent 40%,
-      rgba(6, 7, 5, 0.72) 100%
+      ellipse 78% 72% at 50% 48%,
+      transparent 42%,
+      rgba(255, 254, 253, 0.75) 100%
     );
   }
 
@@ -345,8 +340,8 @@
     /* Oversized and offset so the animated shift never exposes an edge. */
     inset: -150%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.16;
-    mix-blend-mode: overlay;
+    opacity: 0.09;
+    mix-blend-mode: multiply;
     pointer-events: none;
     animation: grain-shift 0.7s steps(5) infinite;
   }

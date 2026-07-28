@@ -15,7 +15,7 @@ import RsvpBanner from "@/components/RsvpBanner";
 export default function Home() {
   return (
     <>
-      <Nav title={wedding.siteName} overHero />
+      <Nav title={wedding.siteName} />
       <main id="main">
         <CinematicHero />
         <Story />

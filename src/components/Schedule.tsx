@@ -79,19 +79,19 @@ export default function Schedule() {
     <section
       id="schedule"
       className="relative overflow-hidden py-16 sm:py-20"
-      style={{ backgroundColor: "#0e0805" }}
+      style={{ backgroundColor: "var(--color-paper-sunk)" }}
     >
       {/* Ambient glow in the colour of whichever function is in view. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 transition-colors duration-1000"
         style={{
-          background: `radial-gradient(ellipse 55% 45% at 50% 45%, ${current.palette.accent}22, transparent 70%)`,
+          background: `radial-gradient(ellipse 55% 45% at 50% 45%, ${current.palette.accent}1f, transparent 70%)`,
         }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 w-[46rem] max-w-[110vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.07] transition-colors duration-1000"
+        className="pointer-events-none absolute left-1/2 top-1/2 w-[46rem] max-w-[110vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.14] transition-colors duration-1000"
         style={{ color: current.palette.accent }}
       >
         <Rangoli />
@@ -105,10 +105,10 @@ export default function Schedule() {
           >
             Three days
           </p>
-          <h2 className="font-display text-4xl text-[#f6ece0] sm:text-5xl">
+          <h2 className="font-display text-4xl text-ink sm:text-5xl">
             The Procession
           </h2>
-          <p className="mx-auto mt-5 max-w-xl leading-relaxed text-[#c4ac97]">
+          <p className="mx-auto mt-5 max-w-xl leading-relaxed text-ink-soft">
             Each function has its own colour, and the weekend moves through them.
             Slide across — the ones marked <em>by invitation</em>{" "}
             are on your card if they&rsquo;re yours.
@@ -129,12 +129,12 @@ export default function Schedule() {
               aria-current={i === active ? "true" : undefined}
             >
               <article
-                className="flex h-full min-h-[min(58vh,27rem)] flex-col justify-between p-7 transition-all duration-700 sm:p-10"
+                className="flex h-full min-h-[min(58vh,27rem)] flex-col justify-between border border-line/60 p-7 transition-all duration-700 sm:p-10"
                 style={{
                   backgroundColor: event.palette.bg,
                   color: event.palette.ink,
                   // The panel you are looking at sits forward of the others.
-                  opacity: i === active ? 1 : 0.45,
+                  opacity: i === active ? 1 : 0.62,
                   transform: i === active ? "scale(1)" : "scale(0.965)",
                 }}
               >
@@ -212,7 +212,7 @@ export default function Schedule() {
               onClick={() => goTo(Math.max(0, active - 1))}
               disabled={active === 0}
               aria-label="Previous function"
-              className="border border-[#4a3a30] px-4 py-2 text-[#e0cdb9] transition-colors hover:border-current disabled:opacity-30"
+              className="border border-line px-4 py-2 text-ink-soft transition-colors hover:border-bloom hover:text-bloom disabled:opacity-30"
             >
               ←
             </button>
@@ -233,7 +233,7 @@ export default function Schedule() {
                       style={{
                         width: i === active ? "2.25rem" : "0.75rem",
                         backgroundColor:
-                          i === active ? event.palette.accent : "#4a3a30",
+                          i === active ? event.palette.accent : "var(--color-line)",
                       }}
                     />
                   </button>
@@ -246,7 +246,7 @@ export default function Schedule() {
               onClick={() => goTo(Math.min(events.length - 1, active + 1))}
               disabled={active === events.length - 1}
               aria-label="Next function"
-              className="border border-[#4a3a30] px-4 py-2 text-[#e0cdb9] transition-colors hover:border-current disabled:opacity-30"
+              className="border border-line px-4 py-2 text-ink-soft transition-colors hover:border-bloom hover:text-bloom disabled:opacity-30"
             >
               →
             </button>
@@ -256,7 +256,7 @@ export default function Schedule() {
             events={[...wedding.events]}
             calendarName={`${wedding.siteName} weekend`}
             label="Add the whole weekend"
-            className="btn border border-[#4a3a30] text-[#e0cdb9] transition-colors hover:border-current"
+            className="btn btn-ghost"
           />
         </div>
       </div>

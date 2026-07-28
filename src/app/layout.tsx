@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter, Tiro_Devanagari_Hindi } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Inter,
+  Pinyon_Script,
+  Tiro_Devanagari_Hindi,
+} from "next/font/google";
 import { wedding, coupleNames } from "@config/wedding";
 import ServiceWorker from "@/components/ServiceWorker";
 import "./globals.css";
@@ -7,7 +12,18 @@ import "./globals.css";
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
+  // Headings are set in italic, so that face has to come down too.
+  style: ["normal", "italic"],
   variable: "--font-cormorant",
+  display: "swap",
+});
+
+// Reserved for the couple's names and the biggest moments — a copperplate
+// script is unreadable at paragraph size and lovely at display size.
+const pinyon = Pinyon_Script({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-pinyon",
   display: "swap",
 });
 
@@ -64,10 +80,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fdf7ec" },
-    { media: "(prefers-color-scheme: dark)", color: "#17100c" },
-  ],
+  // One value: the site is light in every scheme.
+  themeColor: "#fffefd",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -75,7 +89,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable} ${devanagari.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${pinyon.variable} ${inter.variable} ${devanagari.variable}`}>
       <body className="min-h-dvh antialiased">
         <a
           href="#main"

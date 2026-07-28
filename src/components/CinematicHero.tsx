@@ -120,20 +120,15 @@ export default function CinematicHero() {
         */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 w-[34rem] max-w-[125vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.18] text-[color:var(--cinema-gold)] sm:w-[42rem]"
+          className="pointer-events-none absolute left-1/2 top-1/2 w-[34rem] max-w-[125vw] -translate-x-1/2 -translate-y-1/2 opacity-[0.3] text-[color:var(--cinema-gold)] sm:w-[42rem]"
         >
           <Rangoli immediate startDelay={0.6} />
         </div>
 
         {wedding.hero.script && (
           <p
-            className="cinema-fade font-script text-2xl text-[color:var(--cinema-gold)] sm:text-3xl"
-            // The garlands sit directly behind this line at some viewport
-            // heights; the halo keeps it legible whatever it lands on.
-            style={{
-              animationDelay: "250ms",
-              textShadow: "0 2px 18px rgba(12, 6, 4, 0.85), 0 0 6px rgba(12, 6, 4, 0.7)",
-            }}
+            className="cinema-fade font-deva text-xl text-[color:var(--cinema-gold)] sm:text-2xl"
+            style={{ animationDelay: "250ms" }}
             lang="hi"
           >
             {wedding.hero.script}
@@ -150,7 +145,7 @@ export default function CinematicHero() {
         </p>
 
         <h1
-          className="cinema-title mt-6 font-display text-6xl leading-[0.92] text-[color:var(--cinema-ink)] sm:text-8xl lg:text-9xl"
+          className="cinema-title mt-4 font-script text-6xl leading-[1.15] text-[color:var(--cinema-ink)] sm:text-8xl lg:text-[8.5rem]"
           style={{ animationDelay: "150ms" }}
         >
           {wedding.hero.headline}

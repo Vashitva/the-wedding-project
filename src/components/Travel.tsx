@@ -53,13 +53,13 @@ export default function Travel() {
                       href={hotel.bookingUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-marigold underline decoration-line underline-offset-4 hover:decoration-marigold"
+                      className="text-bloom underline decoration-line underline-offset-4 hover:decoration-bloom"
                     >
                       Book a room
                     </a>
                   )}
                   {hotel.phone && (
-                    <a href={`tel:${hotel.phone.replace(/\s/g, "")}`} className="text-ink-faint hover:text-marigold">
+                    <a href={`tel:${hotel.phone.replace(/\s/g, "")}`} className="text-ink-faint hover:text-bloom">
                       {hotel.phone}
                     </a>
                   )}

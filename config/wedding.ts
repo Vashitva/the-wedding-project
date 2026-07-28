@@ -21,9 +21,10 @@ export type EventItem = {
   optional?: boolean;
   /**
    * The colour world of this function. Every ritual already has one — mehendi
-   * is green, haldi is turmeric, the pheras are sindoor and gold — and the
+   * is green, haldi is turmeric, the pheras are rose and gold — and the
    * schedule moves through them rather than flattening everything to one
-   * palette. `bg` needs to stay dark enough for `ink` to read on it.
+   * palette. Kept as pale washes so the procession stays part of a white
+   * floral page; `ink` has to read on `bg`.
    */
   palette: { bg: string; accent: string; ink: string };
 };
@@ -131,8 +132,8 @@ export const wedding = {
       poster: "",
       /** CSS object-position — move the framing if faces sit off-centre. */
       focalPoint: "50% 45%",
-      /** 0–1. How far the backdrop is darkened so the type stays legible. */
-      scrim: 0.55,
+      /** 0–1. How far the white veil lifts the backdrop so the type stays legible. */
+      scrim: 0.34,
     },
   },
 
@@ -169,7 +170,7 @@ export const wedding = {
   events: [
     {
       id: "mehendi",
-      palette: { bg: "#12301f", accent: "#9dc46a", ink: "#e8f2dd" },
+      palette: { bg: "#eaf0e4", accent: "#61794f", ink: "#2c3a26" },
       name: "Mehendi",
       start: "2027-05-14T15:00:00-04:00",
       end: "2027-05-14T19:00:00-04:00",
@@ -182,7 +183,7 @@ export const wedding = {
     },
     {
       id: "sangeet",
-      palette: { bg: "#241242", accent: "#ff77ab", ink: "#f3e6f6" },
+      palette: { bg: "#efe7f3", accent: "#7d5f90", ink: "#352a3c" },
       name: "Sangeet",
       start: "2027-05-14T19:30:00-04:00",
       end: "2027-05-14T23:30:00-04:00",
@@ -194,7 +195,7 @@ export const wedding = {
     },
     {
       id: "haldi",
-      palette: { bg: "#5a3c05", accent: "#ffd166", ink: "#fff4dc" },
+      palette: { bg: "#fbf1d8", accent: "#a5811f", ink: "#453612" },
       name: "Haldi",
       start: "2027-05-15T09:00:00-04:00",
       end: "2027-05-15T10:30:00-04:00",
@@ -207,7 +208,7 @@ export const wedding = {
     },
     {
       id: "baraat",
-      palette: { bg: "#6b2708", accent: "#ffa445", ink: "#ffeedd" },
+      palette: { bg: "#fbe9dd", accent: "#bd7040", ink: "#4a2c18" },
       name: "The Baraat",
       start: "2027-05-15T11:00:00-04:00",
       end: "2027-05-15T11:45:00-04:00",
@@ -219,7 +220,7 @@ export const wedding = {
     },
     {
       id: "ceremony",
-      palette: { bg: "#54101f", accent: "#f2c45a", ink: "#ffeade" },
+      palette: { bg: "#fbe7e8", accent: "#b0606d", ink: "#452129" },
       name: "The Wedding Ceremony",
       start: "2027-05-15T12:00:00-04:00",
       end: "2027-05-15T14:00:00-04:00",
@@ -231,7 +232,7 @@ export const wedding = {
     },
     {
       id: "reception",
-      palette: { bg: "#141225", accent: "#e8b45c", ink: "#f1ebe0" },
+      palette: { bg: "#e8edf3", accent: "#5f7695", ink: "#2a3340" },
       name: "Reception",
       start: "2027-05-15T19:00:00-04:00",
       end: "2027-05-16T01:00:00-04:00",
@@ -243,7 +244,7 @@ export const wedding = {
     },
     {
       id: "farewell-brunch",
-      palette: { bg: "#3d2415", accent: "#f0b27a", ink: "#fbeadb" },
+      palette: { bg: "#f8f1e7", accent: "#9a7a53", ink: "#40311f" },
       name: "Farewell Brunch",
       start: "2027-05-16T11:00:00-04:00",
       end: "2027-05-16T14:00:00-04:00",

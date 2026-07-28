@@ -49,7 +49,7 @@ export default function Countdown({
     return (
       <p
         className={`font-display text-2xl ${
-          tone === "light" ? "text-[color:var(--cinema-gold)]" : "text-marigold"
+          tone === "light" ? "text-[color:var(--cinema-gold)]" : "text-bloom"
         }`}
       >
         Today&rsquo;s the day.
