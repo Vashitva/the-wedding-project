@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createTorusRenderer, type TorusPose } from "@/lib/torus";
 
 /**
  * Two gold rings dropped into the frame: they fall, bounce, spin down, and
@@ -14,6 +15,11 @@ import { useEffect, useRef } from "react";
  *
  * The two rings are a plain wide band and a slimmer one with a stone — the way
  * a pair actually differs. Nothing here encodes who wears which.
+ *
+ * They are shaded as real tori (src/lib/torus.ts), and both rings' facets go
+ * into one depth-sorted buffer — so giving them different yaws puts them in
+ * different planes and the interlock is genuine occlusion rather than a
+ * clipping trick.
  */
 
 const TAU = Math.PI * 2;
@@ -32,6 +38,8 @@ type Ring = {
   /** Rotation in the picture plane. */
   angle: number;
   spin: number;
+  /** Rotation about the vertical axis. Fixed per ring; sets its plane. */
+  yaw: number;
   /** 0 = edge-on, 1 = face-on. Foreshortening, i.e. how far it has tipped. */
   tilt: number;
   tiltVel: number;
@@ -84,6 +92,9 @@ function makeRings(width: number, height: number): Ring[] {
     vy: 0,
     angle: i === 0 ? -0.9 : 1.2,
     spin: i === 0 ? 3.4 : -4.1,
+    // Opposite yaws: the two rings sit in visibly different planes, which is
+    // what lets the depth sort weave them instead of stacking them.
+    yaw: i === 0 ? 0.38 : -0.34,
     // They come in tipped and settle towards face-on as they lose energy.
     tilt: 0.22,
     tiltVel: 0,
@@ -104,83 +115,53 @@ function makeRings(width: number, height: number): Ring[] {
 
 /* ── Drawing ─────────────────────────────────────────────────────────── */
 
-function ringGradient(ctx: CanvasRenderingContext2D, r: number, sweep: number) {
-  const g = ctx.createLinearGradient(-r, -r, r, r);
-  // A metal band is not one colour: it runs dark, flares at the highlight, and
-  // falls back. `sweep` walks that flare around the band after it settles.
-  const hot = 0.32 + Math.sin(sweep) * 0.18;
-  g.addColorStop(0, "#8a6620");
-  g.addColorStop(Math.max(0.04, hot - 0.16), "#c9a451");
-  g.addColorStop(hot, "#fff4d2");
-  g.addColorStop(Math.min(0.95, hot + 0.2), "#c9a451");
-  g.addColorStop(1, "#7d5c1c");
-  return g;
+const GOLD: [number, number, number] = [0.94, 0.73, 0.36];
+/** The slimmer ring reads a shade cooler, the way a different alloy would. */
+const PALE_GOLD: [number, number, number] = [0.9, 0.75, 0.47];
+
+function poseOf(ring: Ring): TorusPose {
+  return {
+    cx: ring.x,
+    cy: ring.y,
+    R: ring.radiusScale,
+    a: ring.bandScale,
+    // Never fully edge-on: at exactly zero the surface has no area to shade.
+    tilt: Math.max(0.05, Math.min(1, ring.tilt)),
+    yaw: ring.yaw,
+    roll: ring.angle,
+    albedo: ring.hasStone ? PALE_GOLD : GOLD,
+  };
 }
 
-function drawRing(ctx: CanvasRenderingContext2D, ring: Ring, sweep: number) {
+/** The stone, drawn after the metal so it sits on top of its own band. */
+function drawStone(ctx: CanvasRenderingContext2D, ring: Ring) {
+  if (!ring.hasStone) return;
+
   const r = ring.radiusScale;
-  const inner = r - ring.bandScale;
-  // Never let the ellipse collapse completely, or the ring vanishes edge-on.
-  const tilt = Math.max(0.06, ring.tilt);
+  const tilt = Math.max(0.05, ring.tilt);
+  const s = r * 0.085;
 
   ctx.save();
   ctx.translate(ring.x, ring.y);
   ctx.rotate(ring.angle);
 
+  const sy = -r * tilt;
+
+  const halo = ctx.createRadialGradient(0, sy, 0, 0, sy, s * 3.4);
+  halo.addColorStop(0, "rgba(255,255,255,0.8)");
+  halo.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = halo;
   ctx.beginPath();
-  ctx.ellipse(0, 0, r, r * tilt, 0, 0, TAU);
-  ctx.ellipse(0, 0, inner, inner * tilt, 0, 0, TAU);
-  ctx.fillStyle = ringGradient(ctx, r, sweep);
-  ctx.fill("evenodd");
+  ctx.arc(0, sy, s * 3.4, 0, TAU);
+  ctx.fill();
 
-  // A fine bright rim along the outer edge reads as a polished lip.
-  ctx.beginPath();
-  ctx.ellipse(0, 0, r, r * tilt, 0, 0, TAU);
-  ctx.strokeStyle = "rgba(255,248,225,0.55)";
-  ctx.lineWidth = Math.max(0.6, r * 0.012);
-  ctx.stroke();
-
-  if (ring.hasStone) {
-    // Sits at the top of the band, and is foreshortened with it.
-    const sy = -r * tilt;
-    const s = r * 0.085;
-
-    const halo = ctx.createRadialGradient(0, sy, 0, 0, sy, s * 3.4);
-    halo.addColorStop(0, "rgba(255,255,255,0.75)");
-    halo.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(0, sy, s * 3.4, 0, TAU);
-    ctx.fill();
-
-    ctx.save();
-    ctx.translate(0, sy);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-s / 2, -s / 2, s, s);
-    // One facet, so it catches light rather than reading as a plain square.
-    ctx.fillStyle = "rgba(198,220,255,0.7)";
-    ctx.fillRect(-s / 2, -s / 2, s / 2, s / 2);
-    ctx.restore();
-  }
-
-  ctx.restore();
-}
-
-/**
- * The weave. Draw the back ring, the front ring, then repaint the arc of the
- * back ring that crosses in front — which is what makes two overlapping circles
- * read as interlocked rather than stacked.
- */
-function drawWeave(ctx: CanvasRenderingContext2D, back: Ring, front: Ring, sweep: number) {
-  ctx.save();
-  ctx.beginPath();
-  // Only the upper half of the overlap: one ring passes over at the top and
-  // under at the bottom, which is how a real pair sits.
-  const midX = (back.x + front.x) / 2;
-  ctx.rect(midX - front.radiusScale, back.y - front.radiusScale * 1.2, front.radiusScale * 2, front.radiusScale * 1.2);
-  ctx.clip();
-  drawRing(ctx, back, sweep);
+  ctx.translate(0, sy);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(-s / 2, -s / 2, s, s);
+  // One facet, so it catches light rather than reading as a plain square.
+  ctx.fillStyle = "rgba(198,220,255,0.7)";
+  ctx.fillRect(-s / 2, -s / 2, s / 2, s / 2);
   ctx.restore();
 }
 
@@ -222,6 +203,7 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     let height = canvas.clientHeight;
     let rings = makeRings(width, height);
     let sparks: Spark[] = [];
+    const torus = createTorusRenderer();
     let elapsed = 0;
 
     const applySize = () => {
@@ -247,7 +229,6 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
       const floorY = floorFor(height);
-      const sweep = elapsed * 0.9;
 
       for (const ring of rings) drawShadow(ctx, ring, floorY);
 
@@ -261,10 +242,13 @@ export default function RingDrop({ className = "" }: { className?: string }) {
       }
       ctx.globalAlpha = 1;
 
-      // Back ring first, then the front one, then the weave arc on top.
-      drawRing(ctx, rings[0], sweep);
-      drawRing(ctx, rings[1], sweep + 1.7);
-      drawWeave(ctx, rings[0], rings[1], sweep);
+      // Both rings go into one buffer and are painted in depth order, so where
+      // they cross, whichever is actually nearer wins.
+      torus.reset();
+      for (const ring of rings) torus.collect(poseOf(ring));
+      torus.flush(ctx);
+
+      for (const ring of rings) drawStone(ctx, ring);
     };
 
     applySize();

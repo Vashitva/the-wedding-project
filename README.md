@@ -338,6 +338,18 @@ The ring ceremony gets a second layer on top of its motes: two gold rings that
 fall into frame, bounce, spin down and settle interlocked
 (`src/components/RingDrop.tsx`).
 
+The rings are shaded as **real tori** (`src/lib/torus.ts`), not drawn as flat
+annuli. The surface is walked point by point, each facet gets its own normal,
+and the lighting is Lambert plus a Blinn specular over a warm-above /
+cool-below environment. That is what makes the band look round, puts a
+highlight that rolls as it turns, and shows you the inside of the far side
+through the hole.
+
+Facets from **both** rings go into one depth-sorted buffer, so giving the two
+different yaws puts them in different planes and the interlock is genuine
+occlusion — no clipping trick. Buffers are allocated once and reused; building
+a couple of thousand objects a frame would be pure garbage.
+
 The fall is real ballistics — gravity, restitution, angular momentum, energy
 lost at every contact, a spark burst on each bounce, and a contact shadow that
 tightens and darkens as the ring comes down. The *landing* is a critically
