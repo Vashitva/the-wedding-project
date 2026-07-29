@@ -350,6 +350,13 @@ different yaws puts them in different planes and the interlock is genuine
 occlusion — no clipping trick. Buffers are allocated once and reused; building
 a couple of thousand objects a frame would be pure garbage.
 
+The bands are cut to engagement-ring proportions — a tube radius of about six
+percent of the ring — which means the shading has to be smooth, because a thin
+band shows every step. Each facet's corners are nudged half a pixel out from
+its own centre so neighbours overlap instead of leaving hairline antialiasing
+seams; that is materially cheaper than stroking every quad a second time, and
+it is what buys the segment count needed to keep the silhouette round.
+
 The fall is real ballistics — gravity, restitution, angular momentum, energy
 lost at every contact, a spark burst on each bounce, and a contact shadow that
 tightens and darkens as the ring comes down. The *landing* is a critically
@@ -357,8 +364,19 @@ damped spring onto a fixed pose, because a freely tumbling rigid body will not
 reliably come to rest in a composition worth looking at, and this one has to
 land the same way for every guest.
 
-The two rings differ the way a pair actually does — one plain wide band, one
-slimmer with a stone. Nothing in the code encodes who wears which.
+The two rings differ the way a pair actually does — one plain band, one slimmer
+with a stone. Nothing in the code encodes who wears which.
+
+The stone is an actual **round brilliant**: a table, eight kite facets, eight
+stars and sixteen upper girdle facets, which is the real count for the cut. The
+arrangement matters more than any single highlight, because the eye recognises
+the pattern of a brilliant long before it reads a specular. Each facet lights
+from a source fixed in *screen* space, so the sparkle sweeps across the stone as
+the ring rolls, and each carries its own phase offset so neighbours come alight
+out of step with one another — that scatter is the difference between a diamond
+and a bead. The scintillation is also driven by elapsed time, so the stone keeps
+twinkling after the rings have stopped moving; a diamond on a still hand still
+sparkles, because the room moves even when the ring does not.
 
 `floorFor()` is where they come to rest, as a fraction of the frame; the
 simulation, the renderer and the rest pose all read from it, so moving the

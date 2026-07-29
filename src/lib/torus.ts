@@ -43,7 +43,7 @@ export type TorusPose = {
 const LIGHT: [number, number, number] = [0.42, -0.72, 0.55];
 const SKY: [number, number, number] = [1.02, 0.98, 0.9];
 const GROUND: [number, number, number] = [0.34, 0.33, 0.4];
-const SHININESS = 48;
+const SHININESS = 34;
 
 const norm = ([x, y, z]: [number, number, number]): [number, number, number] => {
   const l = Math.hypot(x, y, z) || 1;
@@ -54,7 +54,12 @@ const L = norm(LIGHT);
 // Half-vector between the light and the view axis (0,0,1), for Blinn specular.
 const H = norm([L[0], L[1], L[2] + 1]);
 
-export function createTorusRenderer(segmentsU = 84, segmentsV = 12) {
+/**
+ * Facet counts. The ring needs many segments around its circumference or the
+ * silhouette goes polygonal, and the tube needs enough around its section that
+ * the light rolls across the band smoothly instead of stepping.
+ */
+export function createTorusRenderer(segmentsU = 132, segmentsV = 8) {
   const perRing = segmentsU * segmentsV;
   // Grown on demand; two rings is the normal case.
   let capacity = perRing * 2;
@@ -133,6 +138,8 @@ export function createTorusRenderer(segmentsU = 84, segmentsV = 12) {
           ];
 
           let sumZ = 0;
+          let sumX = 0;
+          let sumY = 0;
           let ok = true;
 
           for (let k = 0; k < 4; k++) {
@@ -146,10 +153,29 @@ export function createTorusRenderer(segmentsU = 84, segmentsV = 12) {
             const idx = (count << 2) + k;
             xs[idx] = pose.cx + px;
             ys[idx] = pose.cy + py;
+            sumX += xs[idx];
+            sumY += ys[idx];
             sumZ += pz;
             if (!Number.isFinite(px) || !Number.isFinite(py)) ok = false;
           }
           if (!ok) continue;
+
+          // Nudge every corner out from the facet's own centre by half a pixel.
+          // Neighbouring facets otherwise leave hairline seams where their
+          // antialiased edges fail to meet, and overlapping them is far cheaper
+          // than stroking every quad a second time to cover the gap.
+          const midX = sumX * 0.25;
+          const midY = sumY * 0.25;
+          for (let k = 0; k < 4; k++) {
+            const idx = (count << 2) + k;
+            const dx = xs[idx] - midX;
+            const dy = ys[idx] - midY;
+            const len = Math.hypot(dx, dy);
+            if (len > 0.0001) {
+              xs[idx] = midX + dx * (1 + 0.5 / len);
+              ys[idx] = midY + dy * (1 + 0.5 / len);
+            }
+          }
 
           // Normal at the facet centre. For a torus it is simply the direction
           // from the tube's spine out to the surface.
@@ -166,9 +192,11 @@ export function createTorusRenderer(segmentsU = 84, segmentsV = 12) {
 
           const ndl = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
           const ndh = Math.max(0, nx * H[0] + ny * H[1] + nz * H[2]);
-          const spec = Math.pow(ndh, SHININESS) * 1.5;
+          const spec = Math.pow(ndh, SHININESS) * 1.15;
           // Grazing angles brighten — the lip you see on any polished band.
-          const rim = Math.pow(1 - nz, 3) * 0.5;
+          // Gentler than before: a strong rim term outlines the band and makes
+          // a slim ring look like a drawn stroke rather than a solid object.
+          const rim = Math.pow(1 - nz, 3) * 0.28;
           // Hemisphere ambient: sky above, bounce below.
           const up = ny * -0.5 + 0.5;
 
@@ -213,11 +241,6 @@ export function createTorusRenderer(segmentsU = 84, segmentsV = 12) {
         ctx.closePath();
         ctx.fillStyle = `rgb(${reds[q]},${greens[q]},${blues[q]})`;
         ctx.fill();
-        // Stroke the same path: adjacent facets otherwise leave hairline seams
-        // where their antialiased edges fail to meet.
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.lineWidth = 1;
-        ctx.stroke();
       }
       ctx.globalAlpha = 1;
       count = 0;

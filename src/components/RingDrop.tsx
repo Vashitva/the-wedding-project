@@ -108,8 +108,9 @@ function makeRings(width: number, height: number): Ring[] {
   });
 
   return [
-    { ...base(0), radiusScale: radius, bandScale: radius * 0.15, hasStone: false },
-    { ...base(1), radiusScale: radius * 0.86, bandScale: radius * 0.1, hasStone: true },
+    // The plain band, and the slimmer solitaire beside it.
+    { ...base(0), radiusScale: radius, bandScale: radius * 0.058, hasStone: false },
+    { ...base(1), radiusScale: radius * 0.88, bandScale: radius * 0.046, hasStone: true },
   ];
 }
 
@@ -133,35 +134,216 @@ function poseOf(ring: Ring): TorusPose {
   };
 }
 
-/** The stone, drawn after the metal so it sits on top of its own band. */
-function drawStone(ctx: CanvasRenderingContext2D, ring: Ring) {
+/* ── The stone ───────────────────────────────────────────────────────── */
+
+type Facet = {
+  /** Corners in unit space: 1 is the girdle radius. */
+  pts: [number, number][];
+  /** Direction of the centroid — this is what turns as the ring rolls. */
+  angle: number;
+  radius: number;
+  /** Base reflectance. The table returns most light; the girdle facets least. */
+  tone: number;
+  /** Dispersion bias, negative cool and positive warm. */
+  fire: number;
+  /** Fixed phase offset, so neighbours light up out of step with each other. */
+  seed: number;
+};
+
+const polar = (a: number, r: number): [number, number] => [Math.cos(a) * r, Math.sin(a) * r];
+
+/**
+ * A round brilliant, laid out once and reused every frame.
+ *
+ * Thirty-three crown facets — the table, eight kites, eight stars and sixteen
+ * upper girdle facets — which is the real count for the cut. Getting the
+ * arrangement right matters far more than shading any one facet well: the eye
+ * recognises the pattern of a brilliant long before it reads a highlight.
+ */
+const BRILLIANT: Facet[] = (() => {
+  const facets: Facet[] = [];
+  const step = TAU / 8;
+  const TABLE = 0.5;
+  const SHOULDER = 0.78;
+
+  /** Table vertex. */
+  const T = (k: number) => polar(k * step, TABLE);
+  /** Where a kite meets its neighbouring star, half a step round. */
+  const S = (k: number) => polar((k + 0.5) * step, SHOULDER);
+  /** Girdle, sixteen points around. */
+  const G = (j: number) => polar(j * step * 0.5, 1);
+
+  const add = (pts: [number, number][], tone: number, fire: number, seed: number) => {
+    let x = 0;
+    let y = 0;
+    for (const p of pts) {
+      x += p[0];
+      y += p[1];
+    }
+    x /= pts.length;
+    y /= pts.length;
+    facets.push({
+      pts,
+      angle: Math.atan2(y, x),
+      radius: Math.hypot(x, y),
+      tone,
+      fire,
+      seed,
+    });
+  };
+
+  // Table first — everything else is painted around it.
+  add(
+    Array.from({ length: 8 }, (_, k) => T(k)),
+    1,
+    0,
+    0,
+  );
+
+  for (let k = 0; k < 8; k++) {
+    // Kite: apex on the table, lateral corners either side, point on the girdle.
+    add([T(k), S(k - 1), G(2 * k), S(k)], 0.92, k % 2 ? 0.5 : -0.4, k * 1.7);
+    // Star: sits on a table edge and reaches out between two kites.
+    add([T(k), T(k + 1), S(k)], 0.86, k % 3 ? -0.6 : 0.7, k * 2.9 + 0.8);
+    // Upper girdle facets, in pairs either side of the star's outer point.
+    // Deliberately unequal: a uniformly dark outer band would read as a sphere's
+    // terminator rather than as a row of facets.
+    add([S(k), G(2 * k), G(2 * k + 1)], 0.9, 0.8, k * 3.7 + 1.9);
+    add([S(k), G(2 * k + 1), G(2 * k + 2)], 0.74, -0.8, k * 4.3 + 3.1);
+  }
+
+  return facets;
+})();
+
+/** Fixed in screen space: the stone is lit by the room, not by its own frame. */
+const STONE_LIGHT = -Math.PI * 0.58;
+
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/**
+ * The stone, drawn after the metal so it sits on top of its own band.
+ *
+ * @param time seconds since the animation started, so the scintillation carries
+ *   on after the rings have stopped moving. A diamond on a still hand still
+ *   sparkles — the room moves even when the ring does not.
+ */
+function drawStone(ctx: CanvasRenderingContext2D, ring: Ring, time: number) {
   if (!ring.hasStone) return;
 
   const r = ring.radiusScale;
-  const tilt = Math.max(0.05, ring.tilt);
-  const s = r * 0.085;
+  const tilt = Math.max(0.05, Math.min(1, ring.tilt));
+  // Proportional to the band, with a floor: on a phone the ring is small enough
+  // that a strictly scaled stone would land under ten pixels and lose its cut.
+  const s = Math.max(r * 0.17, 9);
+  // Mounted on the outer face of the band, standing proud of the setting.
+  const sy = -(r + ring.bandScale * 1.2) * tilt - s * 0.22;
 
   ctx.save();
   ctx.translate(ring.x, ring.y);
   ctx.rotate(ring.angle);
+  ctx.translate(0, sy);
 
-  const sy = -r * tilt;
-
-  const halo = ctx.createRadialGradient(0, sy, 0, 0, sy, s * 3.4);
-  halo.addColorStop(0, "rgba(255,255,255,0.8)");
+  // Scatter. A diamond throws light onto everything immediately around it, and
+  // without this the stone reads as a sticker rather than as something lit.
+  const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 3.2);
+  halo.addColorStop(0, "rgba(255,255,255,0.55)");
+  halo.addColorStop(0.4, "rgba(240,246,255,0.15)");
   halo.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = halo;
   ctx.beginPath();
-  ctx.arc(0, sy, s * 3.4, 0, TAU);
+  ctx.arc(0, 0, s * 3.2, 0, TAU);
   ctx.fill();
 
-  ctx.translate(0, sy);
-  ctx.rotate(Math.PI / 4);
+  // Facets flash as the stone turns; that sweep is most of what sells it.
+  const flash = Math.pow(Math.abs(Math.cos(ring.angle * 1.5 + time * 0.7)), 6);
+
+  ctx.save();
+  // The stone stands up out of the band, so it faces the camera more squarely
+  // than the ring does — only lightly foreshortened, never as flat as the band.
+  ctx.scale(s, s * (0.68 + 0.32 * tilt));
+  ctx.lineJoin = "round";
+
+  // Claws: four tapered prongs reaching in over the girdle. Drawn under the
+  // crown so only their tips show, which is how a setting actually looks.
+  ctx.fillStyle = "#c19a55";
+  for (let k = 0; k < 4; k++) {
+    const a = (k + 0.5) * (TAU / 4);
+    ctx.save();
+    ctx.translate(Math.cos(a) * 0.94, Math.sin(a) * 0.94);
+    ctx.rotate(a);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 0.26, 0.15, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  ctx.lineWidth = 1.2 / s;
+  for (const facet of BRILLIANT) {
+    // The table's centroid is at the origin, so it has no direction to light —
+    // give it a steady value instead of a meaningless one.
+    const facing =
+      facet.radius < 0.08 ? 0.62 : Math.cos(facet.angle + ring.angle - STONE_LIGHT);
+
+    // Scintillation. Inside a real stone each facet is at its own angle, so
+    // they come alight out of step with one another rather than as a smooth
+    // gradient — that scatter is the difference between a diamond and a bead.
+    const twinkle = 0.5 + 0.5 * Math.sin(facet.seed + ring.angle * 3.2 + time * 1.7);
+
+    let v = facet.tone * (0.52 + 0.2 * facing + 0.3 * twinkle);
+    v += Math.pow(Math.max(0, facing), 12) * (0.35 + 0.4 * flash);
+    v = Math.max(0, Math.min(1, v));
+
+    // Dispersion: the facets that aren't blazing split the light a little.
+    const warm = facet.fire * (1 - v) * 34;
+
+    const cr = Math.min(255, Math.round(mix(196, 255, v) + warm));
+    const cg = Math.min(255, Math.round(mix(208, 255, v) + warm * 0.3));
+    const cb = Math.min(255, Math.round(mix(226, 255, v) - warm * 0.6));
+
+    ctx.beginPath();
+    ctx.moveTo(facet.pts[0][0], facet.pts[0][1]);
+    for (let i = 1; i < facet.pts.length; i++) {
+      ctx.lineTo(facet.pts[i][0], facet.pts[i][1]);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+    ctx.fill();
+    // Facet edges are visible on a real stone, and a hairline stroke also closes
+    // the antialiasing seams between neighbours.
+    ctx.strokeStyle = `rgba(255,255,255,0.55)`;
+    ctx.stroke();
+  }
+
+  // Prong tips, folded over the girdle.
+  ctx.fillStyle = "#e6c684";
+  for (let k = 0; k < 4; k++) {
+    const a = (k + 0.5) * (TAU / 4);
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * 0.84, Math.sin(a) * 0.84, 0.13, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // The glint. It belongs to the eye, not to the stone, so it does not rotate
+  // with the ring and it is not squashed with it.
+  ctx.rotate(-ring.angle);
+  const reach = s * (0.9 + 1.4 * flash);
+  const waist = s * 0.09;
+  ctx.globalAlpha = 0.4 + 0.5 * flash;
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(-s / 2, -s / 2, s, s);
-  // One facet, so it catches light rather than reading as a plain square.
-  ctx.fillStyle = "rgba(198,220,255,0.7)";
-  ctx.fillRect(-s / 2, -s / 2, s / 2, s / 2);
+  ctx.beginPath();
+  for (let k = 0; k < 4; k++) {
+    const a = k * (TAU / 4);
+    const [px, py] = polar(a, reach);
+    const [wx, wy] = polar(a + TAU / 8, waist);
+    if (k === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+    ctx.lineTo(wx, wy);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
   ctx.restore();
 }
 
@@ -248,7 +430,7 @@ export default function RingDrop({ className = "" }: { className?: string }) {
       for (const ring of rings) torus.collect(poseOf(ring));
       torus.flush(ctx);
 
-      for (const ring of rings) drawStone(ctx, ring);
+      for (const ring of rings) drawStone(ctx, ring, elapsed);
     };
 
     applySize();
