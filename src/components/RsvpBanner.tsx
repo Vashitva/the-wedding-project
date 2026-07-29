@@ -7,7 +7,7 @@ import Reveal from "./Reveal";
 /** Closing call to action, with the deadline stated plainly. */
 export default function RsvpBanner() {
   const open = rsvpIsOpen();
-  const deadline = formatDate(`${wedding.rsvpDeadline}T12:00:00`);
+  const deadline = formatDate(wedding.rsvpDeadline);
 
   return (
     <section className="py-24 sm:py-32">

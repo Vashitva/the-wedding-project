@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import { wedding, coupleNames } from "@config/wedding";
 import ServiceWorker from "@/components/ServiceWorker";
+import Concierge from "@/components/Concierge";
 import "./globals.css";
 
 // Every heading. An art-nouveau face — high-waisted, thin-stroked and
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         {children}
+        <Concierge />
         <ServiceWorker />
       </body>
     </html>

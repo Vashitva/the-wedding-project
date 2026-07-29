@@ -7,6 +7,21 @@ import { wedding } from "@config/wedding";
  */
 const TZ = wedding.timeZone;
 
+/**
+ * A bare `YYYY-MM-DD` is parsed as UTC midnight, so rendering it in a western
+ * time zone lands on the *previous* day — `2027-03-27` printed as 26 March.
+ * Anchoring at midday puts it far enough from either boundary that no offset
+ * can move it across one.
+ *
+ * Strings that already carry a time are left alone: those are real instants,
+ * and shifting them would be wrong.
+ */
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+function instant(iso: string): Date {
+  return new Date(DATE_ONLY.test(iso) ? `${iso}T12:00:00` : iso);
+}
+
 export function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
@@ -14,7 +29,7 @@ export function formatDate(iso: string): string {
     month: "long",
     year: "numeric",
     timeZone: TZ,
-  }).format(new Date(iso));
+  }).format(instant(iso));
 }
 
 export function formatDayAndMonth(iso: string): string {
@@ -23,7 +38,7 @@ export function formatDayAndMonth(iso: string): string {
     day: "numeric",
     month: "long",
     timeZone: TZ,
-  }).format(new Date(iso));
+  }).format(instant(iso));
 }
 
 export function formatTime(iso: string): string {

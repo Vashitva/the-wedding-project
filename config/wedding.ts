@@ -416,7 +416,7 @@ export const wedding = {
     {
       question: "What should I wear?",
       answer:
-        "Indian formal for the ceremony and reception, and something bright and comfortable for the mehendi. For the haldi, wear yellow and wear something you are happy to throw away afterwards — the turmeric does not come out.",
+        "Indian formal for the ring ceremony and the shadi, and something bright and comfortable for the sangeet — you will be dancing in it. For the haldi, wear yellow and wear something you are happy to throw away afterwards, because the turmeric does not come out.",
     },
     {
       question: "I don't own Indian clothes. Is that a problem?",
@@ -431,12 +431,12 @@ export const wedding = {
     {
       question: "What actually happens at the baraat?",
       answer:
-        "Yash arrives at the gate with a dhol player and everyone dances them in. It is loud, it lasts about forty-five minutes, and you are very much invited to join rather than watch. Arrive by 10:45am if you want to be part of it.",
+        "Yash arrives at the gate with a dhol player and everyone dances them in. It is loud, it lasts about twenty minutes, and you are very much invited to join rather than watch. Arrive by 4:45pm if you want to be part of it.",
     },
     {
       question: "How long is the ceremony?",
       answer:
-        "About two hours. The priest explains each step in English as it happens, so it is easy to follow even if it is your first Hindu wedding. Seating is open, people come and go, and lunch is served straight afterwards.",
+        "About two hours. The priest explains each step in English as it happens, so it is easy to follow even if it is your first Hindu wedding. Seating is open, people come and go, and dinner is served straight afterwards.",
     },
     {
       question: "Will there be food I can eat?",
@@ -467,6 +467,61 @@ export const wedding = {
 
   /** Set to false to hide the song-request field in the RSVP form. */
   collectSongRequests: true,
+
+  /**
+   * The concierge — a chat window that answers guests' questions from
+   * everything above, and can hand back real directions and calendar entries.
+   *
+   * It answers **only** from this file. It is told to say it doesn't know and
+   * point at `contact.email` rather than guess, because a wedding site that
+   * confidently states the wrong venue is worse than one that says nothing.
+   *
+   * Needs ANTHROPIC_API_KEY set on the server. Without it the button hides
+   * itself and the site behaves exactly as it did before.
+   */
+  concierge: {
+    enabled: true,
+    /** The label on the button, and the heading inside the panel. */
+    label: "Ask us anything",
+    greeting:
+      "Hello! Ask me anything about the wedding — where to be, when, what to wear, how to get there.",
+    /** Shown as tappable chips before the first message. Keep them short. */
+    suggestions: [
+      "How do I get to the sangeet?",
+      "What should I wear to the haldi?",
+      "When does everything start?",
+      "Where should I stay?",
+    ],
+
+    /**
+     * Who's who. **This is the one section the concierge cannot infer** — the
+     * rest of this file covers logistics, but nothing here knows that Neha is
+     * Sanjana's sister unless you write it down.
+     *
+     * Two things worth deciding before you fill it in:
+     *
+     *  - Anything you put here, the concierge will tell anyone who has the
+     *    link. The site is not indexed by search engines, but links get
+     *    forwarded. Write it as you'd write a wedding programme, not a family
+     *    address book — no phone numbers, no addresses, nothing you would
+     *    mind a colleague of a cousin reading.
+     *  - Left empty, the concierge simply says it doesn't know and points
+     *    people at you. That is a perfectly good place to start.
+     */
+    family: [
+      // {
+      //   side: "partnerOne",
+      //   heading: "Sanjana's family",
+      //   body: "Her parents, Anjali and Rakesh, are hosting the haldi at the house on Saturday morning. Neha is her younger sister and the maid of honour.",
+      // },
+    ] as { side: "partnerOne" | "partnerTwo" | "both"; heading: string; body: string }[],
+
+    /**
+     * Anything else guests keep asking that doesn't belong on a page. Free
+     * text — the concierge reads it verbatim.
+     */
+    extraNotes: [] as string[],
+  },
 };
 
 export type WeddingConfig = typeof wedding;

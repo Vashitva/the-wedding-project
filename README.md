@@ -55,7 +55,7 @@ The **guest list** is `data/guests.json`. Each entry is one *invitation* (a
   "id": "okafor-family",
   "code": "HAZEL",
   "displayName": "The Okafor Family",
-  "events": ["mehendi", "sangeet", "baraat", "ceremony", "reception"],
+  "events": ["ring-ceremony", "sangeet", "haldi", "shadi"],
   "plusOnesAllowed": 0,
   "members": [
     { "id": "tom-okafor", "firstName": "Tom", "lastName": "Okafor" },
@@ -197,6 +197,7 @@ by its poster frame. Nothing disappears.
 | `ADMIN_PASSWORD` | to open `/admin` | Password for the replies dashboard. Unset means the dashboard stays closed. |
 | `ADMIN_SESSION_SECRET` | recommended | Signs the admin session cookie. Unset means sessions drop on every restart. |
 | `RSVP_TOKEN_SECRET` | recommended | Signs the short-lived token issued after a guest lookup. Falls back to `ADMIN_SESSION_SECRET`. |
+| `ANTHROPIC_API_KEY` | for the concierge | Powers the "Ask us anything" chat. Unset means the button hides itself and nothing else changes. |
 
 Generate secrets with `openssl rand -hex 32`.
 
@@ -239,6 +240,100 @@ meal, allergies collected in one place, every reply in full, who you're still
 waiting on (with their invitation codes), and the song requests. **Export CSV**
 gives you one row per person — including the people who haven't replied — which
 is the format caterers and venues actually ask for.
+
+---
+
+## The concierge
+
+An **Ask us anything** button in the corner of every page opens a chat panel
+that answers guests' questions about the wedding. It needs `ANTHROPIC_API_KEY`
+on the server; without one it removes its own button and the site behaves
+exactly as it did before.
+
+### It only knows what you wrote
+
+`src/lib/concierge/knowledge.ts` renders `config/wedding.ts` into one plain-text
+document — every event with its times, venue, dress code and notes, the travel
+and hotel sections, the story, the wedding party, the registry, the FAQ. That
+document *is* the model's world. It is told to answer from it and nothing else,
+and to say it doesn't know and point at your contact email rather than guess.
+
+That is the whole design. A wedding site that confidently states the wrong
+venue is worse than one that says nothing, because guests act on it. A guest
+sent to `hello@` is mildly inconvenienced; a guest sent to the wrong barn is
+not.
+
+Two consequences worth knowing:
+
+- **The reference is byte-stable** — built from config with no timestamps and
+  no unordered iteration, so it is identical on every request from every guest.
+  That is what lets it sit behind a prompt-cache breakpoint: roughly 2,900
+  tokens that the first question pays for and every question after it reads at
+  about a tenth of the price.
+- **Whatever is wrong in your config, the concierge will repeat with total
+  confidence.** Building this surfaced three contradictions in the FAQ that had
+  been sitting on the site unnoticed — a dress-code answer referring to a
+  mehendi that isn't one of the four functions, a baraat arrival time of
+  10:45am for a 5:00pm ceremony, and lunch promised after an evening wedding.
+  Reading the generated document (`npm run build` then inspect
+  `KNOWLEDGE`) is a surprisingly good proofread of your own content.
+
+### It can only do what the site can do
+
+Two tools, and both map onto something that already exists:
+
+| Tool | What it does | Reuses |
+|---|---|---|
+| `get_directions` | Returns a real map link, plus your own travel notes | `mapsUrl()` |
+| `add_to_calendar` | Offers a calendar file for one or more events | `src/lib/ics.ts` |
+
+Nothing was invented for the chat window, which is the point: the model cannot
+promise a capability that doesn't exist, because there is no tool for it. It is
+told explicitly never to estimate a journey time from its own knowledge — the
+route comes from Google, not from the model.
+
+Tools return a short result for the model **and** an action for the browser,
+sent before the sentence describing it. So the button is on screen by the time
+the model says "here you go", and pressing it runs the same code the event
+pages run. A promise made in the chat is kept by the same builder that keeps it
+everywhere else.
+
+**On reminders:** the calendar file is the reminder. The guest's own calendar
+does the nagging. The concierge is told to say so plainly rather than implying
+it will text them later — push notifications would need VAPID keys, a push
+service, and an install-to-home-screen step that most guests won't take.
+
+### The families section
+
+`concierge.family` in the config ships empty, with a comment explaining why.
+Nothing else in the config knows that Neha is Sanjana's sister, so without it
+the concierge declines family questions and points at your email — which is a
+perfectly good place to start.
+
+Before filling it in, note that **anything you put there, the concierge will
+tell anyone who has the link**. The site is `noindex`, but links get forwarded.
+Write it like a wedding programme, not a family address book.
+
+### What it doesn't know
+
+It cannot see who it is talking to — not their invitation, not their RSVP, not
+which of the four functions they're invited to. Asked, it says so and sends
+them to the RSVP page. Wiring the party token through would let it answer
+"which events am I invited to?", and is the obvious next step.
+
+### Safety and privacy
+
+- The API key is read server-side in `src/app/api/concierge/route.ts` and never
+  reaches the browser.
+- Rate limited to 20 questions per 5 minutes per IP, reusing the same limiter
+  as the RSVP lookup, so the endpoint can't be used to burn your credit.
+- Messages are capped in length and count, and the transcript from the browser
+  is rebuilt rather than trusted — roles narrowed, content clipped.
+- **Nothing is logged.** A guest asking for directions types where they live;
+  that is their personal data in a prompt. It is used for the one request and
+  dropped. The conversation lives in the browser tab and nowhere else.
+- Tool inputs come from the model, so ids are checked against the config rather
+  than interpolated, and free text is URL-encoded before it goes near a link.
 
 ---
 
@@ -293,8 +388,12 @@ src/app/
   api/rsvp/lookup/          Find an invitation
   api/rsvp/                 Submit a reply
   api/admin/export/         CSV export
+  api/concierge/            Guest concierge chat (streaming)
 
 src/lib/
+  concierge/knowledge.ts    Everything the concierge is allowed to know
+  concierge/tools.ts        Directions and calendar, the only things it can do
+  ics.ts                    Calendar file builder, shared by button and chat
   particles.ts              Physics for the event pages
   guests.ts                 Invitation list + lookup
   store.ts                  Atomic JSON storage
@@ -484,3 +583,10 @@ All times are formatted in the wedding's own time zone (`timeZone` in the
 config), never the guest's. A guest in London sees the ceremony at 4:00pm
 because that is when it starts — which is the only time that matters — and it
 keeps server and browser rendering identical.
+
+Date-only values (`rsvpDeadline`) get one extra step. A bare `YYYY-MM-DD` is
+parsed as UTC midnight, so rendering it in a western time zone lands on the
+*previous* day — `2027-03-27` printed as 26 March, a full day earlier than the
+deadline the server actually enforces. `formatDate` anchors date-only strings
+at midday, far enough from either boundary that no offset can move them across
+one. Strings that carry a time are left alone: those are real instants.
