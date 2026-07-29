@@ -504,3 +504,175 @@
     display: none !important;
   }
 }
+
+/* ── The concierge launcher ───────────────────────────────────────────
+ *
+ * A flat rectangle in the corner of a floral page reads as a browser widget
+ * rather than as part of the invitation. So this is a pill with actual
+ * volume — a vertical gradient, a warm lift shadow rather than a grey one, and
+ * a hairline of light along the top edge where a raised object would catch it.
+ *
+ * The hover flourish is a single band of gold travelling around the border. It
+ * is a rotating conic gradient behind the pill rather than a stroked SVG,
+ * because a conic sweep needs no knowledge of the shape it is going around —
+ * the pill can change size with its label and the light still tracks the edge.
+ * `--sweep-angle` is registered so it can be interpolated; where @property is
+ * unsupported the gradient simply sits still, which is a ring rather than a
+ * broken effect.
+ */
+@property --sweep-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer components {
+  .launcher {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    /* Vertical padding is set by the 44px minimum tap target, not by taste —
+     * at 0.75rem the pill came out 42px tall, which is a fiddly thing to hit
+     * with a thumb. */
+    padding: 0.875rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-on-bloom);
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-bloom-soft),
+      var(--color-bloom) 55%,
+      #a2646f
+    );
+    /* Warm shadows, layered near-to-far. A single grey drop shadow on this
+     * palette reads as dirt on the paper. */
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 1px 2px rgb(120 78 86 / 0.18),
+      0 6px 16px -4px rgb(120 78 86 / 0.32),
+      0 14px 32px -12px rgb(120 78 86 / 0.3);
+    transition:
+      transform 320ms cubic-bezier(0.2, 0.8, 0.25, 1),
+      box-shadow 320ms ease;
+  }
+
+  /*
+   * The travelling light.
+   *
+   * Masked down to its own 2px band rather than layered behind the pill: a
+   * pseudo-element at `z-index: -1` paints above its parent's *background*
+   * (only in-flow content sits above it), so a filled disc back there bled
+   * gold across the lower half of the pill. Two masks composited with
+   * `exclude` punch the middle out, which makes it a real ring — and then it
+   * no longer matters what paints above what.
+   */
+  .launcher::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    padding: 3px;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    /* A long soft ramp into a short bright core: a hard-edged arc reads as a
+     * rotating shape, a ramp reads as light moving along an edge. */
+    background: conic-gradient(
+      from var(--sweep-angle),
+      transparent 0deg,
+      transparent 190deg,
+      rgb(189 168 127 / 0.35) 250deg,
+      var(--color-gold) 305deg,
+      #fffaf0 334deg,
+      var(--color-gold) 346deg,
+      rgb(189 168 127 / 0.3) 355deg,
+      transparent 360deg
+    );
+    opacity: 0.45;
+    transition: opacity 320ms ease;
+  }
+
+  /* A slow idle turn, so the ring is a hint that something is alive rather
+   * than a decoration nobody notices until they hover.
+   *
+   * The pill itself never moves at rest. An earlier version breathed in and
+   * out; it made the corner of the page restless, it left the button
+   * permanently mid-transform for anything trying to click it, and — worst of
+   * the three — it stole the hover. Growth means something only if the resting
+   * state is still. */
+  .launcher::before {
+    animation: launcher-sweep 9s linear infinite;
+  }
+
+  .launcher:hover,
+  .launcher:focus-visible {
+    transform: scale(1.07);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.38),
+      0 2px 4px rgb(120 78 86 / 0.2),
+      0 10px 24px -4px rgb(120 78 86 / 0.38),
+      0 22px 48px -14px rgb(120 78 86 / 0.34);
+  }
+
+  /* Hover brightens the ring and speeds it up — the flourish is the same
+   * motion, leaned into, not a different animation cutting in. */
+  .launcher:hover::before,
+  .launcher:focus-visible::before {
+    opacity: 1;
+    animation-duration: 2.4s;
+  }
+
+  .launcher:active {
+    transform: scale(1.02);
+  }
+
+  .launcher-mark {
+    flex-shrink: 0;
+    transform-origin: center;
+    animation: launcher-turn 32s linear infinite;
+  }
+
+  /* The lotus counter-rotates a little faster under the cursor. Two speeds
+   * around one centre is what stops it looking like a spinner. */
+  .launcher:hover .launcher-mark,
+  .launcher:focus-visible .launcher-mark {
+    animation-duration: 9s;
+  }
+
+  @keyframes launcher-sweep {
+    to {
+      --sweep-angle: 360deg;
+    }
+  }
+
+  @keyframes launcher-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /*
+   * Reduced motion keeps the object and drops the movement: the pill still has
+   * its volume and the ring is still there, just held still. Hover remains
+   * legible through the shadow and the ring brightening.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .launcher::before,
+    .launcher-mark {
+      animation: none;
+    }
+
+    .launcher:hover,
+    .launcher:focus-visible,
+    .launcher:active {
+      transform: none;
+    }
+  }
+}

@@ -34,6 +34,42 @@ const CALENDAR_EVENTS = wedding.events.map((event) => ({
   description: event.description,
 }));
 
+/**
+ * The eight-petal lotus from the section dividers, at button scale.
+ *
+ * Reusing the page's own motif is what keeps the launcher reading as part of
+ * the invitation rather than as a support widget bolted to the corner. Drawn
+ * rather than imported so the stroke weight can be tuned for 18px, where the
+ * divider's hairline would disappear.
+ */
+function LotusMark() {
+  return (
+    <svg
+      aria-hidden
+      width="18"
+      height="18"
+      viewBox="-13 -13 26 26"
+      fill="none"
+      className="launcher-mark"
+    >
+      {Array.from({ length: 8 }, (_, i) => i * 45).map((angle) => (
+        <ellipse
+          key={angle}
+          cx="0"
+          cy="-6.5"
+          rx="2.7"
+          ry="5.4"
+          transform={`rotate(${angle})`}
+          stroke="currentColor"
+          strokeWidth="1.1"
+          opacity="0.9"
+        />
+      ))}
+      <circle r="2" fill="currentColor" opacity="0.95" />
+    </svg>
+  );
+}
+
 function ActionChip({ action }: { action: Action }) {
   if (action.kind === "directions") {
     return (
@@ -205,8 +241,9 @@ export default function Concierge() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="btn btn-primary fixed right-4 bottom-4 z-40 shadow-lg sm:right-6 sm:bottom-6"
+          className="launcher fixed right-4 bottom-4 z-40 sm:right-6 sm:bottom-6"
         >
+          <LotusMark />
           {wedding.concierge.label}
         </button>
       )}

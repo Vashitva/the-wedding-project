@@ -310,6 +310,42 @@ does the nagging. The concierge is told to say so plainly rather than implying
 it will text them later — push notifications would need VAPID keys, a push
 service, and an install-to-home-screen step that most guests won't take.
 
+### The launcher
+
+A flat rectangle in the corner of a floral page reads as a browser widget
+rather than as part of the invitation, so the button is a pill with actual
+volume: a vertical gradient, a hairline of light along the top edge where a
+raised object would catch it, and a **warm** layered shadow — a grey drop
+shadow on this palette reads as dirt on the paper. The mark inside it is the
+same eight-petal lotus as the section dividers, redrawn at 18px because the
+divider's hairline stroke disappears at that size.
+
+On hover or keyboard focus the pill grows about 7% and a band of gold sweeps
+around its border. The band is a rotating `conic-gradient` rather than a
+stroked SVG, so it needs no knowledge of the shape it travels around — the pill
+can change width with its label and the light still tracks the edge.
+`--sweep-angle` is registered with `@property` so it can be interpolated;
+where that isn't supported the gradient simply sits still, which is a ring
+rather than a broken effect. Hover doesn't cut to a different animation, it
+leans into the same one: the ring brightens and speeds up, and the lotus turns
+faster.
+
+Two things that took a second pass:
+
+- The gradient was originally a filled disc behind the pill at `z-index: -1`,
+  which bled gold across its lower half — a negative-z pseudo-element paints
+  above its parent's *background* (only in-flow content sits above it). Two
+  masks composited with `exclude` punch the middle out, making it a real ring,
+  after which paint order stops mattering.
+- The pill used to breathe in and out at rest. It made the corner of the page
+  restless, it left the button permanently mid-transform for anything trying to
+  click it, and worst of all it stole the hover — growth only means something
+  if the resting state is still.
+
+Reduced motion keeps the object and drops the movement: the volume and the ring
+stay, held still, and hover is still legible through the shadow and the ring
+brightening.
+
 ### Anthropic or OpenAI
 
 Both are supported. They share everything that decides whether an answer is
