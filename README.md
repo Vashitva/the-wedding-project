@@ -332,7 +332,30 @@ profiles over it. Nothing is keyframed.
 | Haldi | `haldi` | Turmeric with real weight and drag, breaking up as it falls |
 | Shadi | `petals` | A shower of petals, each swinging as it turns edge-on |
 
-The petals are the point of the whole thing. A falling petal turns edge-on and
+### The rings
+
+The ring ceremony gets a second layer on top of its motes: two gold rings that
+fall into frame, bounce, spin down and settle interlocked
+(`src/components/RingDrop.tsx`).
+
+The fall is real ballistics — gravity, restitution, angular momentum, energy
+lost at every contact, a spark burst on each bounce, and a contact shadow that
+tightens and darkens as the ring comes down. The *landing* is a critically
+damped spring onto a fixed pose, because a freely tumbling rigid body will not
+reliably come to rest in a composition worth looking at, and this one has to
+land the same way for every guest.
+
+The two rings differ the way a pair actually does — one plain wide band, one
+slimmer with a stone. Nothing in the code encodes who wears which.
+
+`floorFor()` is where they come to rest, as a fraction of the frame; the
+simulation, the renderer and the rest pose all read from it, so moving the
+rings up or down is one number. Reduced motion skips the drop and paints the
+settled composition.
+
+### The petals
+
+The petals are the point of the particle engine. A falling petal turns edge-on and
 back; the same phase both narrows the sprite and pushes it sideways, so it
 swings as it falls instead of dropping straight. That one coupling is the
 difference between a petal and a falling `div`.

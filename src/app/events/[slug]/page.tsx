@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import Ornament from "@/components/Ornament";
 import Reveal from "@/components/Reveal";
 import EventAnimation from "@/components/EventAnimation";
+import RingDrop from "@/components/RingDrop";
 import AddToCalendar from "@/components/AddToCalendar";
 
 type Params = { slug: string };
@@ -50,12 +51,23 @@ export default async function EventPage({ params }: { params: Promise<Params> })
       <main id="main">
         {/* The frame ---------------------------------------------------- */}
         <section
-          className="relative flex min-h-[72svh] items-end overflow-hidden pt-32 pb-16"
+          className="relative flex min-h-[78svh] items-end overflow-hidden pt-32 pb-16"
           style={{ backgroundColor: event.palette.bg, color: event.palette.ink }}
         >
           <div aria-hidden className="absolute inset-0">
             <EventAnimation animation={event.animation} />
           </div>
+
+          {/*
+            The ring ceremony gets the pair of rings dropped over the ambient
+            motes — rigid bodies rather than a particle field, so they live in
+            their own layer.
+          */}
+          {event.animation === "rings" && (
+            <div aria-hidden className="absolute inset-0">
+              <RingDrop />
+            </div>
+          )}
 
           {/* Keeps the type readable wherever the particles happen to gather. */}
           <div
