@@ -34,12 +34,14 @@ the schedule, travel notes, hotels, the story timeline, the wedding party,
 registry links, meal options and the FAQ. Edit that one file and the whole site,
 the calendar downloads, the app manifest and the RSVP form follow.
 
-The seed content is a three-day Indian wedding — mehendi, sangeet, haldi,
-baraat, the ceremony under a mandap, reception, farewell brunch — with meal
-options of vegetarian, Jain, non-vegetarian and a children's plate, and an FAQ
-covering what to wear, which colours to avoid, and what actually happens at a
+The wedding is four functions — **ring ceremony, sangeet, haldi and shadi** —
+with meal options of vegetarian, Jain, non-vegetarian and a children's plate,
+and an FAQ covering what to wear, which colours to avoid, and what happens at a
 baraat. Every function is a separate event guests answer for individually, so a
-guest invited only to the ceremony and reception never sees the rest.
+guest invited only to the shadi never sees the rest.
+
+Each one also gets **its own page** at `/events/<id>`, generated from the same
+config — see "The four pages" below.
 
 Rename, reorder or delete functions freely — but if you change an event's `id`,
 update the `events` array of every invitation in `data/guests.json` to match, or
@@ -253,6 +255,7 @@ public/hero-foreground.png  Generated near plane, transparent in the middle
 
 src/app/
   page.tsx                  The one-page site (cinematic landing + editorial body)
+  events/[slug]/            A page per function, with its own physics
   rsvp/                     Guest RSVP flow
   admin/                    Password-protected dashboard
   offline/                  Shown with no connection; carries the schedule
@@ -262,6 +265,7 @@ src/app/
   api/admin/export/         CSV export
 
 src/lib/
+  particles.ts              Physics for the event pages
   guests.ts                 Invitation list + lookup
   store.ts                  Atomic JSON storage
   validate.ts               Server-side submission checks
@@ -292,10 +296,10 @@ public/sw.js                Service worker
 ## The procession
 
 The schedule is not a list. Each function carries its own `palette` in
-`config/wedding.ts` — mehendi sage, sangeet lilac, haldi butter, baraat peach,
-the pheras in blush, the reception in a cool grey — and the weekend is moved
-through sideways, one full-bleed panel per function, with the ambient glow
-behind the track following whichever one is in view.
+`config/wedding.ts` — the ring ceremony in champagne, sangeet in lilac, haldi in
+butter, the shadi in blush — and the weekend is moved through sideways, one
+full-bleed panel per function, with the ambient glow behind the track following
+whichever one is in view. Each panel links through to that function's own page.
 
 ```ts
 palette: { bg: "#eaf0e4", accent: "#61794f", ink: "#2c3a26" },
@@ -308,6 +312,40 @@ date, the venue link and that function's tick in the position indicator.
 It is a native scroll-snap track, so it swipes on a phone, scrolls with a
 trackpad, and takes arrow keys once focused. The prev/next buttons and the tick
 marks are there for everyone else — the ticks double as a jump list.
+
+---
+
+## The four pages
+
+Every function has a page of its own at `/events/<id>`, built from the same
+config entry and prerendered at build time. Each opens on a full-bleed frame in
+that function's colour, running its own physics.
+
+The simulation lives in `src/lib/particles.ts`: one integrator — velocity,
+gravity, drag, a wind field and a swirling turbulence term — with four force
+profiles over it. Nothing is keyframed.
+
+| Function | `animation` | What it is |
+| --- | --- | --- |
+| Ring ceremony | `rings` | Near-weightless gold motes drifting up on warm air |
+| Sangeet | `sangeet` | Lilac orbs rising with a fast flutter, so the drift has a pulse |
+| Haldi | `haldi` | Turmeric with real weight and drag, breaking up as it falls |
+| Shadi | `petals` | A shower of petals, each swinging as it turns edge-on |
+
+The petals are the point of the whole thing. A falling petal turns edge-on and
+back; the same phase both narrows the sprite and pushes it sideways, so it
+swings as it falls instead of dropping straight. That one coupling is the
+difference between a petal and a falling `div`.
+
+Two numbers matter if you tune a profile. **Terminal velocity is
+`gravity / drag`** — if that is lower than the frame height divided by the
+lifetime, particles expire mid-air and the field looks sparse and top-heavy.
+And `count` is scaled by canvas width, so a phone never draws a desktop's
+worth.
+
+The canvas stops completely when it scrolls off screen or the tab is hidden,
+and reduced motion gets one painted frame of the same scene, held still —
+never a blank rectangle.
 
 ---
 

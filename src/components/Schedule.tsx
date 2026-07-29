@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { wedding } from "@config/wedding";
 import { formatDayAndMonth, formatTimeRange, mapsUrl } from "@/lib/format";
@@ -176,29 +177,42 @@ export default function Schedule() {
                   </p>
                 </div>
 
-                <dl className="space-y-1.5 text-sm">
-                  <div>
-                    <dt className="sr-only">Venue</dt>
-                    <dd>
-                      <a
-                        href={mapsUrl(event.address)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline decoration-current/30 underline-offset-4 transition-colors hover:decoration-current"
-                        style={{ color: event.palette.accent }}
-                      >
-                        {event.venue}
-                      </a>
-                      <span className="opacity-60"> · {event.address}</span>
-                    </dd>
-                  </div>
-                  {event.dressCode && (
-                    <div className="flex gap-2 opacity-60">
-                      <dt>Wear:</dt>
-                      <dd>{event.dressCode}</dd>
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <dl className="space-y-1.5 text-sm">
+                    <div>
+                      <dt className="sr-only">Venue</dt>
+                      <dd>
+                        <a
+                          href={mapsUrl(event.address)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline decoration-current/30 underline-offset-4 transition-colors hover:decoration-current"
+                          style={{ color: event.palette.accent }}
+                        >
+                          {event.venue}
+                        </a>
+                        <span className="opacity-60"> · {event.address}</span>
+                      </dd>
                     </div>
-                  )}
-                </dl>
+                    {event.dressCode && (
+                      <div className="flex gap-2 opacity-60">
+                        <dt>Wear:</dt>
+                        <dd>{event.dressCode}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="btn border border-current/25 transition-colors hover:border-current"
+                    style={{ color: event.palette.accent }}
+                    // Off-centre panels are inert to the keyboard, so tab order
+                    // follows what is actually on screen.
+                    tabIndex={i === active ? 0 : -1}
+                  >
+                    More about {event.name}
+                  </Link>
+                </div>
               </article>
             </li>
           ))}

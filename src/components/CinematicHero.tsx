@@ -15,7 +15,7 @@ import Rangoli from "./Rangoli";
  */
 export default function CinematicHero() {
   const { media } = wedding.hero;
-  const ceremony = wedding.events.find((e) => e.id === "ceremony") ?? wedding.events[0];
+  const ceremony = wedding.events.find((e) => e.id === "shadi") ?? wedding.events[0];
 
   const contentRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);

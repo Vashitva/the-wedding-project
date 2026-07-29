@@ -4,13 +4,10 @@
     "code": "HAZEL",
     "displayName": "The Okafor Family",
     "events": [
-      "mehendi",
+      "ring-ceremony",
       "sangeet",
       "haldi",
-      "baraat",
-      "ceremony",
-      "reception",
-      "farewell-brunch"
+      "shadi"
     ],
     "plusOnesAllowed": 0,
     "members": [
@@ -37,13 +34,10 @@
     "code": "ROWAN",
     "displayName": "Neha Desai",
     "events": [
-      "mehendi",
+      "ring-ceremony",
       "sangeet",
       "haldi",
-      "baraat",
-      "ceremony",
-      "reception",
-      "farewell-brunch"
+      "shadi"
     ],
     "plusOnesAllowed": 1,
     "members": [
@@ -59,13 +53,10 @@
     "code": "CEDAR",
     "displayName": "Priya Mehta & Dev Raman",
     "events": [
-      "mehendi",
+      "ring-ceremony",
       "sangeet",
       "haldi",
-      "baraat",
-      "ceremony",
-      "reception",
-      "farewell-brunch"
+      "shadi"
     ],
     "plusOnesAllowed": 0,
     "members": [
@@ -86,8 +77,7 @@
     "code": "ASPEN",
     "displayName": "Jo Harlow",
     "events": [
-      "ceremony",
-      "reception"
+      "shadi"
     ],
     "plusOnesAllowed": 1,
     "members": [
@@ -104,10 +94,7 @@
     "displayName": "Marcus & Elena Vance",
     "events": [
       "sangeet",
-      "baraat",
-      "ceremony",
-      "reception",
-      "farewell-brunch"
+      "shadi"
     ],
     "plusOnesAllowed": 0,
     "members": [

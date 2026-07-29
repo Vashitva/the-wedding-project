@@ -27,6 +27,15 @@ export type EventItem = {
    * floral page; `ink` has to read on `bg`.
    */
   palette: { bg: string; accent: string; ink: string };
+  /**
+   * Which physics runs on this function's own page. Each is a different set of
+   * forces on the same particle engine — see src/lib/particles.ts.
+   */
+  animation: "rings" | "sangeet" | "haldi" | "petals";
+  /** Shown on the event's page, under the heading. A paragraph or three. */
+  detail: string[];
+  /** Practical notes for the page — what to wear, when to arrive, what happens. */
+  notes?: { label: string; body: string }[];
 };
 
 export type StoryBeat = {
@@ -79,7 +88,7 @@ export const wedding = {
   },
 
   /** The headline date — used by the countdown and the "add to calendar" link. */
-  weddingDate: "2027-05-15T12:00:00-04:00",
+  weddingDate: "2027-05-15T17:00:00-04:00",
   timeZone: "America/New_York",
 
   location: {
@@ -176,91 +185,93 @@ export const wedding = {
    */
   events: [
     {
-      id: "mehendi",
-      palette: { bg: "#eaf0e4", accent: "#61794f", ink: "#2c3a26" },
-      name: "Mehendi",
-      start: "2027-05-14T15:00:00-04:00",
-      end: "2027-05-14T19:00:00-04:00",
+      id: "ring-ceremony",
+      palette: { bg: "#f7f2ea", accent: "#a8894e", ink: "#3d3020" },
+      animation: "rings",
+      name: "Ring Ceremony",
+      start: "2027-05-14T18:00:00-04:00",
+      end: "2027-05-14T20:00:00-04:00",
       venue: "The Orchard Room",
       address: "5 Landing Road, Rhinebeck, NY 12572",
       description:
-        "Henna, chai and far too many snacks. Come and get a design done — the artists work until the last hand is finished. Allow a couple of hours for it to dry, and wear something with short sleeves.",
-      dressCode: "Bright and comfortable",
+        "The rings, the families, and the first of many rounds of sweets. Short, warm, and over before anybody's feet hurt.",
+      dressCode: "Indian formal",
       optional: true,
+      detail: [
+        "Both families meet properly for the first time, the rings are exchanged, and everyone eats far more mithai than they meant to. It runs about two hours, most of which is people talking over each other.",
+        "It is the smallest and quietest thing we are doing all weekend, and it is the one we are most nervous about — so please come early and stand near us.",
+      ],
+      notes: [
+        { label: "Arrive by", body: "5:45pm — the exchange itself is right at the start." },
+        { label: "Photographs", body: "There will be a lot. Consider that a warning rather than an invitation." },
+      ],
     },
     {
       id: "sangeet",
-      palette: { bg: "#efe7f3", accent: "#7d5f90", ink: "#352a3c" },
+      palette: { bg: "#f1e9f3", accent: "#7d5f90", ink: "#352a3c" },
+      animation: "sangeet",
       name: "Sangeet",
-      start: "2027-05-14T19:30:00-04:00",
-      end: "2027-05-14T23:30:00-04:00",
+      start: "2027-05-14T20:30:00-04:00",
+      end: "2027-05-15T00:30:00-04:00",
       venue: "Thornfield Barn",
       address: "884 Quarry Road, Rhinebeck, NY 12572",
       description:
         "The night both families perform, with varying degrees of preparation. Dinner, a dance floor, and a running order nobody will stick to.",
       dressCode: "Indian festive",
+      detail: [
+        "Two families, one stage, and a running order that has been renegotiated four times already. Somebody's uncle will do a routine nobody asked for. It will be the best part.",
+        "Dinner is served through the evening rather than all at once, so eat when you're hungry and dance when you're not.",
+      ],
+      notes: [
+        { label: "Performing?", body: "Send your track to Neha by 1 May or you are dancing to whatever she picks." },
+        { label: "Shoes", body: "The floor is barn wood. Heels will find every gap in it." },
+      ],
     },
     {
       id: "haldi",
-      palette: { bg: "#fbf1d8", accent: "#a5811f", ink: "#453612" },
+      palette: { bg: "#fbf3dc", accent: "#a5811f", ink: "#453612" },
+      animation: "haldi",
       name: "Haldi",
-      start: "2027-05-15T09:00:00-04:00",
-      end: "2027-05-15T10:30:00-04:00",
+      start: "2027-05-15T09:30:00-04:00",
+      end: "2027-05-15T11:00:00-04:00",
       venue: "Thornfield Barn — the courtyard",
       address: "884 Quarry Road, Rhinebeck, NY 12572",
       description:
         "Turmeric paste, applied enthusiastically by everyone who loves us. Genuinely: wear something you will never want to wear again.",
       dressCode: "Yellow, and expendable",
       optional: true,
+      detail: [
+        "Turmeric, sandalwood and rosewater, ground into a paste and put on our faces, arms and — if the cousins get their way — hair. It is meant to bless and brighten. It also stains absolutely everything it touches.",
+        "This is the loudest, messiest, least dignified ninety minutes of the weekend, and we would not skip it for anything.",
+      ],
+      notes: [
+        { label: "Wear", body: "Yellow, and something you are genuinely happy to throw away afterwards." },
+        { label: "Turmeric", body: "Comes out of skin in a day or two. Does not come out of fabric. Ever." },
+        { label: "Bring", body: "A change of clothes for later, and sunglasses — the courtyard is bright." },
+      ],
     },
     {
-      id: "baraat",
-      palette: { bg: "#fbe9dd", accent: "#bd7040", ink: "#4a2c18" },
-      name: "The Baraat",
-      start: "2027-05-15T11:00:00-04:00",
-      end: "2027-05-15T11:45:00-04:00",
-      venue: "Quarry Road, at the gate",
-      address: "884 Quarry Road, Rhinebeck, NY 12572",
-      description:
-        "Yash arrives with a dhol, a procession and no sense of hurry. Everyone is welcome to join — this is the dancing-in-the-road part, and it is the best forty-five minutes of the weekend.",
-      dressCode: "Indian formal",
-    },
-    {
-      id: "ceremony",
-      palette: { bg: "#fbe7e8", accent: "#b0606d", ink: "#452129" },
-      name: "The Wedding Ceremony",
-      start: "2027-05-15T12:00:00-04:00",
-      end: "2027-05-15T14:00:00-04:00",
+      id: "shadi",
+      palette: { bg: "#fbe9e9", accent: "#b0606d", ink: "#452129" },
+      animation: "petals",
+      name: "Shadi",
+      start: "2027-05-15T17:00:00-04:00",
+      end: "2027-05-15T21:00:00-04:00",
       venue: "Thornfield Barn — the meadow mandap",
       address: "884 Quarry Road, Rhinebeck, NY 12572",
       description:
-        "The pheras, under a mandap on the grass. The priest will explain each step in English as we go. Seating is open, lunch follows immediately, and the whole thing runs about two hours.",
+        "The pheras, under a mandap on the grass, followed by dinner and a dance floor we are told is structurally sound.",
       dressCode: "Indian formal",
-    },
-    {
-      id: "reception",
-      palette: { bg: "#e8edf3", accent: "#5f7695", ink: "#2a3340" },
-      name: "Reception",
-      start: "2027-05-15T19:00:00-04:00",
-      end: "2027-05-16T01:00:00-04:00",
-      venue: "Thornfield Barn",
-      address: "884 Quarry Road, Rhinebeck, NY 12572",
-      description:
-        "Cocktails, dinner, speeches of unpredictable length, and a dance floor that we are told is structurally sound.",
-      dressCode: "Indian formal or black tie",
-    },
-    {
-      id: "farewell-brunch",
-      palette: { bg: "#f8f1e7", accent: "#9a7a53", ink: "#40311f" },
-      name: "Farewell Brunch",
-      start: "2027-05-16T11:00:00-04:00",
-      end: "2027-05-16T14:00:00-04:00",
-      venue: "The Orchard Room",
-      address: "5 Landing Road, Rhinebeck, NY 12572",
-      description:
-        "Drop in on your way out of town. Chai, poha, eggs for the homesick, and a full accounting of the night before.",
-      dressCode: "Comfortable",
-      optional: true,
+      detail: [
+        "The wedding itself. Yash arrives with a dhol and a procession at five — everyone is welcome to dance him in, and it is the best twenty minutes of the day. The pheras follow under the mandap on the grass.",
+        "The priest explains each of the seven steps in English as we take them, so it is easy to follow even if it is your first Hindu wedding. Seating is open, people come and go, and nobody minds.",
+        "Dinner is served straight afterwards, and the dancing goes until they make us stop.",
+      ],
+      notes: [
+        { label: "Arrive by", body: "4:45pm if you want to be in the baraat. 5:30pm if you would rather be seated." },
+        { label: "Underfoot", body: "The mandap is on grass. Flat shoes or block heels will save you." },
+        { label: "During the pheras", body: "Please don't photograph — we have someone for that, and we would rather see your faces." },
+      ],
     },
   ] satisfies EventItem[],
 
