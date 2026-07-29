@@ -12,8 +12,10 @@ const CACHE_VERSION = "v1";
 const PAGE_CACHE = `pages-${CACHE_VERSION}`;
 const ASSET_CACHE = `assets-${CACHE_VERSION}`;
 
-// The hero backdrop is precached too: it is the landing's whole identity, and
-// an installed app that opens to an empty black frame looks broken.
+// The hero's first frame is precached too: it is the landing's whole identity,
+// and an installed app that opens to an empty frame looks broken. Only the
+// first — the rest of the rotation is a nicety, and precaching several
+// full-bleed photographs would make installing the app expensive.
 const PRECACHE = [
   "/",
   "/rsvp",

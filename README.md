@@ -117,38 +117,67 @@ white page reads as an overcast day rather than as light, and greys the whole
 frame; that is the single value to reach for (`SHADOW` in the generator, plus
 the vignette in `globals.css`) if the landing ever looks murky.
 
-Both planes ship already in place — `public/hero.png` and
-`public/hero-foreground.png`. They are **painted, not photographed** —
+All three planes ship already in place — `public/hero.png`, `public/hero-2.png`
+and `public/hero-foreground.png`. They are **painted, not photographed** —
 generated together by `scripts/generate-hero.mjs`, deliberately soft and
 abstract so they read as atmosphere rather than as a picture of somewhere that
-isn't your venue. Regenerate both after editing the palette, the lighting or
-the planes:
+isn't your venue. The two backdrops are the same garden from different seeds,
+so the landing has something to cross-fade between before you have photographs.
+Regenerate all three after editing the palette, the lighting or the planes:
 
 ```bash
 npm run hero
 ```
 
-To use your own, drop the file in `public/` and point `hero.media` at it in
-`config/wedding.ts`:
+### Using your own photographs
+
+Drop the files in `public/` and list them under `hero.media` in
+`config/wedding.ts`. **One photograph fills the frame and holds; several
+cross-fade slowly behind the type**, the way a title sequence does.
 
 ```ts
 media: {
-  image: "/hero.jpg",             // or leave blank
+  photos: [
+    { src: "/hero.jpg",   focalPoint: "50% 45%" },
+    { src: "/hero-2.jpg", focalPoint: "50% 30%" },
+  ],
+  hold: 7,                            // seconds each frame holds
   foreground: "/hero-foreground.png", // needs alpha and a clear centre; "" to drop it
-  video: "/hero.mp4",             // silent, short, loops cleanly
-  poster: "/hero-poster.jpg",     // required if video is set
-  focalPoint: "50% 45%",          // shift the framing if faces sit high or low
-  scrim: 0.34,                    // 0–1, how far the white veil lifts it
+  video: "/hero.mp4",                 // silent, short, loops cleanly
+  poster: "/hero-poster.jpg",         // required if video is set
+  focalPoint: "50% 45%",              // default framing; per-photo wins
+  scrim: 0.34,                        // 0–1, how far the white veil lifts it
 }
 ```
 
 Overwriting `public/hero.png` with a photograph of the same name also works and
-needs no config change at all. Clear all three of `image`, `video` and `poster`
-and the hero falls back to a pure-CSS wash of blush and sage.
+needs no config change at all. Empty `photos`, `video` and `poster` and the hero
+falls back to a pure-CSS wash of blush and sage.
 
-`scrim` is how far the white veil lifts your backdrop. Raise it if your image is
-busy and the type starts to fight it; lower it to let more of the picture
-through. `focalPoint` is a plain CSS `object-position`.
+Four things are worth knowing before you pick the shots:
+
+- **Give every photograph its own `focalPoint`.** It is a plain CSS
+  `object-position`. The hero is full-bleed, so the same file is cropped wide on
+  a laptop and tall on a phone — a frame that is perfectly composed on your
+  screen can behead the entire wedding party on someone else's.
+- **The centre of the frame is spoken for.** The names, the countdown and the
+  buttons sit dead centre, so choose shots with room there. Two people at the
+  edges of a wide frame beats one face in the middle.
+- **Export for the web.** Around 2400px on the long edge and 250–400 KB each, as
+  WebP or a well-compressed JPEG. Straight-from-the-camera files are 5–8 MB, and
+  this is the first thing every guest downloads. Three good frames beat eight.
+- **Order matters.** The first is what most guests see, and the only one shown
+  to anyone browsing with reduced motion.
+
+A missing file is not a broken landing: a photograph that fails to load is
+dropped from the rotation, and if every one fails the hero falls through to the
+wash. Only the first frame is precached for offline use — precaching a whole
+rotation of full-bleed photographs would make installing the app expensive.
+
+`scrim` is how far the white veil lifts your backdrop. Raise it if your images
+are busy and the type starts to fight them; lower it to let more of the picture
+through. It applies to every frame, so it is worth grading the set to roughly
+the same brightness before you tune it.
 
 Above the names sits an optional line in Devanagari — `hero.script` in the
 config, defaulting to शुभ विवाह. Swap it for your own script, an invocation your
@@ -251,6 +280,7 @@ scripts/generate-icons.mjs  PWA icon generator
 scripts/generate-hero.mjs   Landing backdrop + foreground generator
 scripts/lib/png.mjs         Shared minimal PNG encoder
 public/hero.png             Generated landing backdrop — replace with a photo
+public/hero-2.png           Second backdrop; the landing cross-fades between them
 public/hero-foreground.png  Generated near plane, transparent in the middle
 
 src/app/

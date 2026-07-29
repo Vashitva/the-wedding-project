@@ -124,17 +124,32 @@ export const wedding = {
     script: "शुभ विवाह",
 
     /**
-     * The landing is a full-bleed cinematic frame. Drop in a photograph or a
-     * short silent clip and it becomes the backdrop; with neither, the hero
-     * falls back to a graded atmospheric wash that is meant to look
-     * deliberate rather than empty.
+     * The landing is a full-bleed cinematic frame. Drop photographs in and they
+     * become the backdrop; with none, the hero falls back to a graded
+     * atmospheric wash that is meant to look deliberate rather than empty.
      *
      * A video needs `poster` too — it is what shows on slow connections,
      * before playback starts, and for anyone browsing with reduced motion.
      */
     media: {
-      /** e.g. "/hero.jpg" in /public, or an external URL. */
-      image: "/hero.png",
+      /**
+       * The backdrop. One photograph fills the frame and holds; several
+       * cross-fade slowly behind the type, the way a title sequence does.
+       *
+       * Order them so the first is the strongest — it is what most guests see,
+       * and the only one anyone arriving with reduced motion sees at all.
+       *
+       * Give each one a `focalPoint` (a CSS object-position) so faces survive
+       * the crop: a frame that is perfect on a laptop can behead everybody on
+       * a phone, where the same photograph is cropped to a tall slot.
+       */
+      photos: [
+        { src: "/hero.png", focalPoint: "50% 45%" },
+        { src: "/hero-2.png", focalPoint: "50% 42%" },
+        // { src: "/hero-3.jpg", focalPoint: "50% 30%" },
+      ],
+      /** Seconds each photograph holds before it cross-fades to the next. */
+      hold: 7,
       /**
        * Blooms in front of the lens, drifting faster than the backdrop as you
        * scroll — this is what gives the landing depth rather than a flat
@@ -146,7 +161,7 @@ export const wedding = {
       video: "",
       /** e.g. "/hero-poster.jpg". Required if `video` is set. */
       poster: "",
-      /** CSS object-position — move the framing if faces sit off-centre. */
+      /** Framing for the video, and for any photograph without its own. */
       focalPoint: "50% 45%",
       /** 0–1. How far the white veil lifts the backdrop so the type stays legible. */
       scrim: 0.34,

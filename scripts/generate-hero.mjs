@@ -28,8 +28,12 @@ import { encodePng } from "./lib/png.mjs";
 // plenty even on a large display, and it keeps the first paint light.
 const WIDTH = 1600;
 const HEIGHT = 900;
-const OUT = path.join(process.cwd(), "public", "hero.png");
 const OUT_FOREGROUND = path.join(process.cwd(), "public", "hero-foreground.png");
+
+const BACKDROPS = [
+  { seed: 20270515, out: path.join(process.cwd(), "public", "hero.png"), label: "public/hero.png" },
+  { seed: 815200704, out: path.join(process.cwd(), "public", "hero-2.png"), label: "public/hero-2.png" },
+];
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -56,7 +60,16 @@ function mulberry32(seed) {
   };
 }
 
-const random = mulberry32(20270515);
+/*
+ * Reseedable, because the backdrop is rendered more than once: the landing
+ * cross-fades between a few frames, and they have to be different arrangements
+ * of the same garden rather than the same picture twice.
+ */
+let source = mulberry32(20270515);
+const random = () => source();
+const reseed = (seed) => {
+  source = mulberry32(seed);
+};
 
 /* ── Palette ─────────────────────────────────────────────────────────── */
 
@@ -111,7 +124,7 @@ function buildBlooms() {
   return blooms;
 }
 
-const blooms = buildBlooms();
+let blooms = buildBlooms();
 
 /** Leaves: simple soft ellipses, tucked behind everything else. */
 function buildLeaves() {
@@ -124,7 +137,7 @@ function buildLeaves() {
   }));
 }
 
-const leaves = buildLeaves();
+let leaves = buildLeaves();
 
 /**
  * Both sets are looked up per pixel, and there are far too many to test them
@@ -144,8 +157,17 @@ function bucketByColumn(items, reachMultiplier) {
   return columns;
 }
 
-const leafColumns = bucketByColumn(leaves, 2.2);
-const bloomColumns = bucketByColumn(blooms, 2.2);
+let leafColumns = bucketByColumn(leaves, 2.2);
+let bloomColumns = bucketByColumn(blooms, 2.2);
+
+/** Lays out a fresh garden. Everything downstream reads these four. */
+function plant(seed) {
+  reseed(seed);
+  blooms = buildBlooms();
+  leaves = buildLeaves();
+  leafColumns = bucketByColumn(leaves, 2.2);
+  bloomColumns = bucketByColumn(blooms, 2.2);
+}
 
 /* ── Foreground plane ────────────────────────────────────────────────── */
 
@@ -331,12 +353,22 @@ function paintForeground() {
   return encodePng(WIDTH, HEIGHT, pixels, { alpha: true });
 }
 
-const backdrop = paintBackdrop();
-writeFileSync(OUT, backdrop);
-console.log(
-  `wrote public/hero.png (${WIDTH}×${HEIGHT}, ${(backdrop.length / 1024).toFixed(0)} KB)`,
-);
+/*
+ * Two backdrops. The landing holds each for a few seconds and cross-fades, so
+ * they need to differ enough to be worth the fade and little enough that it
+ * reads as the camera moving rather than as a slideshow of somewhere else.
+ * Same palette, same light, different arrangement.
+ */
+for (const { seed, out, label } of BACKDROPS) {
+  plant(seed);
+  const backdrop = paintBackdrop();
+  writeFileSync(out, backdrop);
+  console.log(`wrote ${label} (${WIDTH}×${HEIGHT}, ${(backdrop.length / 1024).toFixed(0)} KB)`);
+}
 
+// The near plane is painted once and shared: it is the same blooms against the
+// same lens whichever frame is behind it.
+plant(20270515);
 const front = paintForeground();
 writeFileSync(OUT_FOREGROUND, front);
 console.log(
