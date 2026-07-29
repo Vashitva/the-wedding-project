@@ -11,6 +11,7 @@ next-env.d.ts
 
 # Runtime data (RSVP submissions) — never commit guest responses
 /data/rsvps.json
+/data/settings.json
 /data/*.local.json
 
 .DS_Store

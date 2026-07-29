@@ -5,7 +5,16 @@ import { adminPasswordIsConfigured, isAdmin } from "@/lib/auth";
 import { loadParties } from "@/lib/guests";
 import { listRsvps } from "@/lib/store";
 import { buildStats } from "@/lib/stats";
+import { loadSettings } from "@/lib/settings";
+import {
+  PROVIDER_IDS,
+  apiKeyFor,
+  modelFor,
+  resolveProvider,
+  type ProviderId,
+} from "@/lib/concierge/provider";
 import AdminLogin from "@/components/AdminLogin";
+import ConciergeSettings from "@/components/ConciergeSettings";
 import { logout } from "./actions";
 
 export const metadata: Metadata = { title: "Replies", robots: { index: false } };
@@ -30,7 +39,16 @@ export default async function AdminPage() {
     );
   }
 
-  const [parties, rsvps] = await Promise.all([loadParties(), listRsvps()]);
+  const [parties, rsvps, settings] = await Promise.all([
+    loadParties(),
+    listRsvps(),
+    loadSettings(),
+  ]);
+
+  const resolution = resolveProvider(settings.conciergeProvider);
+  const keys = Object.fromEntries(
+    PROVIDER_IDS.map((id) => [id, Boolean(apiKeyFor(id))]),
+  ) as Record<ProviderId, boolean>;
   const stats = buildStats(parties, rsvps);
 
   const respondedIds = new Set(rsvps.map((r) => r.partyId));
@@ -242,6 +260,15 @@ export default async function AdminPage() {
             ))}
           </ul>
         </section>
+      )}
+
+      {wedding.concierge.enabled && (
+        <ConciergeSettings
+          resolution={resolution}
+          chosen={settings.conciergeProvider}
+          model={resolution.id ? modelFor(resolution.id) : null}
+          keys={keys}
+        />
       )}
 
       <p className="mt-12 text-center text-sm">

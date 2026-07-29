@@ -1,14 +1,18 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { wedding } from "@config/wedding";
 import { SYSTEM_PROMPT } from "@/lib/concierge/knowledge";
-import { TOOLS, runTool, type Action } from "@/lib/concierge/tools";
+import {
+  loadProvider,
+  resolveProvider,
+  type ConciergeChunk,
+} from "@/lib/concierge/provider";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { loadSettings } from "@/lib/settings";
 
 /**
  * The concierge endpoint.
  *
- * Runs the tool loop server-side and streams the answer back as newline-
- * delimited JSON. The API key never leaves this process.
+ * Picks a provider, runs its tool loop server-side, and streams the answer
+ * back as newline-delimited JSON. API keys never leave this process.
  *
  * Nothing is persisted. A guest asking for directions types where they live,
  * which is their personal data sitting in a prompt — so it is used for the one
@@ -20,24 +24,14 @@ export const runtime = "nodejs";
 /** The knowledge document is built from config at module load, so never cache. */
 export const dynamic = "force-dynamic";
 
-const MODEL = "claude-opus-5";
-/** Room for a short answer plus the thinking that precedes it. */
-const MAX_TOKENS = 3000;
 /** Generous for a person typing, tight enough to be useless for scraping. */
 const LIMIT = { limit: 20, windowMs: 5 * 60 * 1000 };
 const MAX_MESSAGE = 800;
 const MAX_TURNS = 24;
-/** Tool calls per answer. Two tools exist; anything beyond this is a loop. */
-const MAX_TOOL_ROUNDS = 4;
 
 type Turn = { role: "user" | "assistant"; content: string };
 
-type Chunk =
-  | { type: "text"; text: string }
-  | { type: "action"; action: Action }
-  | { type: "error"; message: string };
-
-function line(chunk: Chunk): Uint8Array {
+function line(chunk: ConciergeChunk): Uint8Array {
   return new TextEncoder().encode(`${JSON.stringify(chunk)}\n`);
 }
 
@@ -46,8 +40,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "The concierge is switched off." }, { status: 404 });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const settings = await loadSettings();
+  const resolution = resolveProvider(settings.conciergeProvider);
+
+  if (!resolution.id) {
     // Not an error the guest caused — the site is simply deployed without a
     // key. The client hides the button when it sees this.
     return Response.json({ error: "unconfigured" }, { status: 503 });
@@ -86,87 +82,22 @@ export async function POST(request: Request) {
     return Response.json({ error: "Ask me something." }, { status: 400 });
   }
 
-  const client = new Anthropic({ apiKey });
-
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const conversation: Anthropic.MessageParam[] = messages.map((turn) => ({
-        role: turn.role,
-        content: turn.content,
-      }));
+      const emit = (chunk: ConciergeChunk) => controller.enqueue(line(chunk));
 
       try {
-        for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-          const answer = client.messages.stream({
-            model: MODEL,
-            max_tokens: MAX_TOKENS,
-            // Adaptive rather than off: with thinking disabled the model can
-            // write a tool call into its visible text, which reads as a normal
-            // reply while silently doing nothing. Low effort keeps it quick —
-            // this is a lookup, not a reasoning problem.
-            thinking: { type: "adaptive" },
-            output_config: { effort: "low" },
-            system: [
-              {
-                type: "text",
-                text: SYSTEM_PROMPT,
-                // The whole prompt is identical for every guest and every
-                // question, so it is one cacheable prefix. Only the messages
-                // that follow it differ.
-                cache_control: { type: "ephemeral" },
-              },
-            ],
-            tools: TOOLS,
-            messages: conversation,
-          });
-
-          answer.on("text", (delta) => controller.enqueue(line({ type: "text", text: delta })));
-
-          const message = await answer.finalMessage();
-
-          const toolUses = message.content.filter(
-            (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
-          );
-
-          if (toolUses.length === 0) break;
-
-          conversation.push({ role: "assistant", content: message.content });
-
-          const results: Anthropic.ToolResultBlockParam[] = [];
-          for (const use of toolUses) {
-            const outcome = runTool(use.name, use.input);
-            // Sent before the model narrates it, so the button is already on
-            // screen by the time the sentence describing it arrives.
-            if (outcome.action) {
-              controller.enqueue(line({ type: "action", action: outcome.action }));
-            }
-            results.push({
-              type: "tool_result",
-              tool_use_id: use.id,
-              content: outcome.result,
-            });
-          }
-
-          conversation.push({ role: "user", content: results });
-
-          if (round === MAX_TOOL_ROUNDS) {
-            controller.enqueue(
-              line({
-                type: "error",
-                message: `I got a bit stuck there — could you ask that another way, or email ${wedding.contact.email}?`,
-              }),
-            );
-          }
-        }
+        const provider = await loadProvider(resolution.id!);
+        await provider.answer({ system: SYSTEM_PROMPT, messages, emit });
       } catch (error) {
-        // The guest gets a usable sentence; the detail goes to the server log.
-        console.error("[concierge]", error);
-        controller.enqueue(
-          line({
-            type: "error",
-            message: `Something went wrong at my end. ${wedding.contact.email} will always get you a person.`,
-          }),
-        );
+        // The guest gets a usable sentence; the detail goes to the server log,
+        // tagged with the provider so a bad model name or a rejected key is
+        // obvious from the logs alone.
+        console.error(`[concierge:${resolution.id}]`, error);
+        emit({
+          type: "error",
+          message: `Something went wrong at my end. ${wedding.contact.email} will always get you a person.`,
+        });
       } finally {
         controller.close();
       }
@@ -177,6 +108,8 @@ export async function POST(request: Request) {
     headers: {
       "Content-Type": "application/x-ndjson; charset=utf-8",
       "Cache-Control": "no-store",
+      // Handy when debugging which model answered; no secret in it.
+      "X-Concierge-Provider": resolution.id,
     },
   });
 }

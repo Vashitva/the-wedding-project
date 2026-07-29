@@ -197,7 +197,9 @@ by its poster frame. Nothing disappears.
 | `ADMIN_PASSWORD` | to open `/admin` | Password for the replies dashboard. Unset means the dashboard stays closed. |
 | `ADMIN_SESSION_SECRET` | recommended | Signs the admin session cookie. Unset means sessions drop on every restart. |
 | `RSVP_TOKEN_SECRET` | recommended | Signs the short-lived token issued after a guest lookup. Falls back to `ADMIN_SESSION_SECRET`. |
-| `ANTHROPIC_API_KEY` | for the concierge | Powers the "Ask us anything" chat. Unset means the button hides itself and nothing else changes. |
+| `ANTHROPIC_API_KEY` | for the concierge | Powers the "Ask us anything" chat via Claude. |
+| `OPENAI_API_KEY` | for the concierge | Same, via OpenAI. Set either or both; with neither, the concierge button hides itself and nothing else changes. |
+| `CONCIERGE_PROVIDER` | optional | `anthropic` or `openai`. Overridden by the dashboard, falls back to `concierge.defaultProvider`. |
 
 Generate secrets with `openssl rand -hex 32`.
 
@@ -246,9 +248,9 @@ is the format caterers and venues actually ask for.
 ## The concierge
 
 An **Ask us anything** button in the corner of every page opens a chat panel
-that answers guests' questions about the wedding. It needs `ANTHROPIC_API_KEY`
-on the server; without one it removes its own button and the site behaves
-exactly as it did before.
+that answers guests' questions about the wedding. It needs an API key on the
+server — Anthropic or OpenAI, either will do; without one it removes its own
+button and the site behaves exactly as it did before.
 
 ### It only knows what you wrote
 
@@ -287,6 +289,11 @@ Two tools, and both map onto something that already exists:
 | `get_directions` | Returns a real map link, plus your own travel notes | `mapsUrl()` |
 | `add_to_calendar` | Offers a calendar file for one or more events | `src/lib/ics.ts` |
 
+Both are declared once in `tools.ts` in neither vendor's dialect — Anthropic
+wants `input_schema`, OpenAI wants `function.parameters`, and it's the same JSON
+Schema underneath — so each adapter reshapes one definition rather than the two
+drifting apart.
+
 Nothing was invented for the chat window, which is the point: the model cannot
 promise a capability that doesn't exist, because there is no tool for it. It is
 told explicitly never to estimate a journey time from its own knowledge — the
@@ -302,6 +309,47 @@ everywhere else.
 does the nagging. The concierge is told to say so plainly rather than implying
 it will text them later — push notifications would need VAPID keys, a push
 service, and an install-to-home-screen step that most guests won't take.
+
+### Anthropic or OpenAI
+
+Both are supported. They share everything that decides whether an answer is
+correct — the same grounding document, the same tool schemas, the same
+executors, the same chunk protocol out to the browser. What differs is one
+adapter each in `src/lib/concierge/providers/`, because Anthropic returns
+finished content blocks and OpenAI returns tool-call fragments identified by
+array index, and a loop that covered both would be harder to follow than two
+idiomatic ones.
+
+Which one answers is decided in this order, and **a preference is only honoured
+if that provider's key is actually set**:
+
+| # | Source | Set it |
+|---|---|---|
+| 1 | The dashboard | `/admin` → *The concierge* → Use |
+| 2 | The environment | `CONCIERGE_PROVIDER=openai` |
+| 3 | The config default | `concierge.defaultProvider` |
+| 4 | Whichever key exists | nothing to set |
+
+That last rule is the one worth understanding. `CONCIERGE_PROVIDER=openai`
+without `OPENAI_API_KEY` is a mistake, and the useful response is to keep
+answering guests on the key that does work while saying plainly what was
+ignored — not to switch the concierge off, and not to pretend the preference
+was honoured. The dashboard shows both: what is answering now, and what it had
+to ignore.
+
+Models are per provider in `concierge.models`. Set them to something your key
+can actually reach; a name your account can't get to shows up as an error in
+the server log rather than failing silently.
+
+The dashboard's choice lands in `data/settings.json` (gitignored, no secrets in
+it — keys only ever come from the environment). It survives a restart but not an
+ephemeral filesystem, which is exactly why `CONCIERGE_PROVIDER` exists too. On
+Vercel or similar, set the env var and leave the dropdown on *Let the
+environment decide*.
+
+`OPENAI_BASE_URL` and `ANTHROPIC_BASE_URL` are read by the SDKs, so either
+provider can be pointed at Azure OpenAI, a gateway, or a local model without
+touching the code.
 
 ### The families section
 
@@ -323,8 +371,10 @@ them to the RSVP page. Wiring the party token through would let it answer
 
 ### Safety and privacy
 
-- The API key is read server-side in `src/app/api/concierge/route.ts` and never
-  reaches the browser.
+- API keys are read server-side only and never reach the browser. The dashboard
+  can choose a *provider*; it cannot see or set a key.
+- The provider switch is behind the admin session, like everything else in
+  `/admin` — it decides where guests' questions get sent.
 - Rate limited to 20 questions per 5 minutes per IP, reusing the same limiter
   as the RSVP lookup, so the endpoint can't be used to burn your credit.
 - Messages are capped in length and count, and the transcript from the browser
@@ -393,6 +443,9 @@ src/app/
 src/lib/
   concierge/knowledge.ts    Everything the concierge is allowed to know
   concierge/tools.ts        Directions and calendar, the only things it can do
+  concierge/provider.ts     Which vendor answers, and how that gets decided
+  concierge/providers/      One adapter each: anthropic.ts, openai.ts
+  settings.ts               Dashboard preferences (no secrets)
   ics.ts                    Calendar file builder, shared by button and chat
   particles.ts              Physics for the event pages
   guests.ts                 Invitation list + lookup

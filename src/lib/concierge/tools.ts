@@ -1,4 +1,3 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import { wedding } from "@config/wedding";
 import { mapsUrl } from "@/lib/format";
 
@@ -22,14 +21,32 @@ export type Action =
 
 export type ToolOutcome = { result: string; action?: Action };
 
+/**
+ * Declared once, in neither vendor's dialect. Anthropic wants
+ * `{name, description, input_schema}` and OpenAI wants
+ * `{type:"function", function:{name, description, parameters}}` — both are the
+ * same JSON Schema underneath, so the schema lives here and each provider
+ * adapter reshapes it. One description, one schema, two wire formats.
+ */
+export type ToolSpec = {
+  name: string;
+  description: string;
+  schema: {
+    type: "object";
+    properties: Record<string, unknown>;
+    required: string[];
+    additionalProperties: false;
+  };
+};
+
 const eventIds = wedding.events.map((e) => e.id);
 
-export const TOOLS: Anthropic.Tool[] = [
+export const TOOL_SPECS: ToolSpec[] = [
   {
     name: "get_directions",
     description:
       "Get a map link and the wedding's own travel notes for one of the events. Call this whenever a guest asks how to reach a venue. Never describe a route or a journey time yourself — this returns the real thing.",
-    input_schema: {
+    schema: {
       type: "object",
       properties: {
         event_id: {
@@ -40,17 +57,21 @@ export const TOOLS: Anthropic.Tool[] = [
         origin: {
           type: "string",
           description:
-            "Where the guest is travelling from, exactly as they said it (e.g. 'Brooklyn', 'JFK', 'Penn Station'). Omit if they did not say.",
+            "Where the guest is travelling from, exactly as they said it (e.g. 'Brooklyn', 'JFK', 'Penn Station'). Pass an empty string if they did not say.",
         },
       },
-      required: ["event_id"],
+      // Both entries are listed because OpenAI's strict function calling
+      // requires every property to be required; `origin` is documented as
+      // acceptably empty instead of being optional.
+      required: ["event_id", "origin"],
+      additionalProperties: false,
     },
   },
   {
     name: "add_to_calendar",
     description:
       "Offer the guest a calendar file for one or more events. Use this when they ask for a reminder, ask to save the date, or say they will forget. Their calendar app does the reminding — you cannot send a message nearer the time.",
-    input_schema: {
+    schema: {
       type: "object",
       properties: {
         event_ids: {
@@ -61,6 +82,7 @@ export const TOOLS: Anthropic.Tool[] = [
         },
       },
       required: ["event_ids"],
+      additionalProperties: false,
     },
   },
 ];

@@ -476,11 +476,33 @@ export const wedding = {
    * point at `contact.email` rather than guess, because a wedding site that
    * confidently states the wrong venue is worse than one that says nothing.
    *
-   * Needs ANTHROPIC_API_KEY set on the server. Without it the button hides
-   * itself and the site behaves exactly as it did before.
+   * Needs an API key on the server — ANTHROPIC_API_KEY or OPENAI_API_KEY.
+   * Without either, the button hides itself and the site behaves exactly as it
+   * did before.
    */
   concierge: {
     enabled: true,
+
+    /**
+     * Which model answers, when nothing else has an opinion.
+     *
+     * The order of precedence is: whatever is chosen in the dashboard, then
+     * the CONCIERGE_PROVIDER environment variable, then this. A preference is
+     * only honoured if that provider's key is actually set — otherwise the
+     * concierge keeps working on the key that *is* set, and the dashboard says
+     * plainly what it ignored.
+     */
+    defaultProvider: "anthropic" as "anthropic" | "openai",
+
+    /**
+     * The model to use for each provider. Set these to something your key
+     * actually has access to — a name your account cannot reach shows up as an
+     * error in the dashboard's concierge panel rather than failing silently.
+     */
+    models: {
+      anthropic: "claude-opus-5",
+      openai: "gpt-4o",
+    },
     /** The label on the button, and the heading inside the panel. */
     label: "Ask us anything",
     greeting:
