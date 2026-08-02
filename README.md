@@ -25,6 +25,29 @@ npm run build
 npm start
 ```
 
+### Testing on your phone
+
+Bind wide so other devices on the wifi can reach it, then open
+`http://<your-laptop-ip>:3000` on the phone:
+
+```bash
+npm run dev -- -H 0.0.0.0
+```
+
+**If the page loads but nothing responds** — the menu button does nothing, the
+ring animation never plays, the concierge won't open — that is Next's dev
+server refusing to serve `/_next/*` to a cross-origin host. React never
+hydrates, so every interactive thing is dead while the page itself looks
+perfectly normal, because the HTML is server-rendered. `allowedDevOrigins` in
+`next.config.ts` already covers the usual private ranges (`192.168.*.*`,
+`10.*.*.*`, `172.*.*.*`, `*.local`); if your machine sits outside them, run
+`DEV_ORIGIN=<host> npm run dev -- -H 0.0.0.0`, and check the dev server output
+for a `Blocked cross-origin request` line, which names the host to add.
+
+None of this applies to `npm start` — a production build works over a bare IP
+with no configuration at all, which also makes it the quickest way to tell a
+dev-server problem apart from a real one.
+
 ---
 
 ## Make it yours
