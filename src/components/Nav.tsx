@@ -87,13 +87,23 @@ export default function Nav({ title }: { title: string }) {
           >
             RSVP
           </Link>
+          {/*
+            Three hairlines are a 13px-tall target on their own. The padding is
+            what makes this hittable — 44×44 is the minimum a thumb can find
+            reliably, and the icon is only the visible part of it.
+
+            It is also deliberately not flush with the screen edge: the outer
+            few millimetres of a phone screen belong to the browser's own
+            back-swipe gesture, and a control sitting in that strip gets
+            swallowed rather than tapped.
+          */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="p-2 -mr-2"
+            className="-mr-1 flex size-11 items-center justify-center"
           >
             <span className="block w-6 space-y-[5px]">
               <span

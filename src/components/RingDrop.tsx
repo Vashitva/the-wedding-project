@@ -381,21 +381,41 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = canvas.clientWidth;
-    let height = canvas.clientHeight;
-    let rings = makeRings(width, height);
+    let width = 0;
+    let height = 0;
+    let rings: Ring[] = [];
     let sparks: Spark[] = [];
     const torus = createTorusRenderer();
     let elapsed = 0;
 
-    const applySize = () => {
-      width = canvas.clientWidth;
-      height = canvas.clientHeight;
+    /**
+     * Reads the element's size and rebuilds anything that depends on it.
+     *
+     * The ring geometry is derived from the frame, so measuring has to come
+     * before building — and it has to be able to happen again. An element can
+     * be zero-sized when its effect first runs (layout not settled, a web font
+     * still swapping, a mobile browser mid address-bar transition), and a
+     * canvas built at zero stays blank forever: its backing store is zero, the
+     * rings have zero radius, and nothing paints. A window `resize` never
+     * arrives to correct it, because the window did not resize — the element
+     * did.
+     */
+    const measure = (): boolean => {
+      const nextWidth = canvas.clientWidth;
+      const nextHeight = canvas.clientHeight;
+      if (nextWidth === 0 || nextHeight === 0) return false;
+      if (nextWidth === width && nextHeight === height) return false;
+
+      width = nextWidth;
+      height = nextHeight;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return true;
     };
+
+    const hasSize = () => width > 0 && height > 0;
 
     const rest = () => {
       for (const ring of rings) {
@@ -409,6 +429,7 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     };
 
     const render = () => {
+      if (!hasSize()) return;
       ctx.clearRect(0, 0, width, height);
       const floorY = floorFor(height);
 
@@ -433,21 +454,24 @@ export default function RingDrop({ className = "" }: { className?: string }) {
       for (const ring of rings) drawStone(ctx, ring, elapsed);
     };
 
-    applySize();
+    if (measure()) rings = makeRings(width, height);
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reduce.matches) {
       // No drop: the composition it would have landed in, straight away.
       rest();
       render();
-      const onResize = () => {
-        applySize();
+
+      // Watches the element, not the window. If the canvas was zero-sized at
+      // mount this is what eventually gives it a picture at all.
+      const observer = new ResizeObserver(() => {
+        if (!measure()) return;
         rings = makeRings(width, height);
         rest();
         render();
-      };
-      window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
+      });
+      observer.observe(canvas);
+      return () => observer.disconnect();
     }
 
     let frame = 0;
@@ -536,7 +560,9 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     };
 
     const start = () => {
-      if (running) return;
+      // Refusing to start without a size is what makes recovery possible: the
+      // ResizeObserver below calls start() again once the element has one.
+      if (running || !hasSize()) return;
       running = true;
       last = performance.now();
       frame = requestAnimationFrame(tick);
@@ -560,27 +586,41 @@ export default function RingDrop({ className = "" }: { className?: string }) {
     else start();
 
     const onVisibility = () => (document.hidden ? stop() : start());
-    const onResize = () => {
-      const wasSettled = rings.every((r) => r.settled);
-      applySize();
+
+    /*
+     * Resizes come from the element, not the window — a canvas can go from
+     * zero to its real size without the window changing at all, which is
+     * exactly the case that used to leave the frame permanently blank.
+     */
+    const sizeObserver = new ResizeObserver(() => {
+      if (!measure()) return;
+
+      const firstSize = rings.length === 0;
+      const wasSettled = !firstSize && rings.every((r) => r.settled);
       rings = makeRings(width, height);
-      // Mid-drop, restart; already landed, stay landed rather than replaying.
-      if (wasSettled) {
+
+      if (firstSize) {
+        // The rings never existed; play the drop properly now that there is a
+        // frame to drop into.
+        elapsed = 0;
+        start();
+      } else if (wasSettled) {
+        // Already landed — re-lay the composition rather than replaying it.
         rest();
         render();
       } else {
         elapsed = 0;
       }
-    };
+    });
+    sizeObserver.observe(canvas);
 
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("resize", onResize);
 
     return () => {
       stop();
       observer?.disconnect();
+      sizeObserver.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("resize", onResize);
     };
   }, []);
 

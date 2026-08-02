@@ -138,9 +138,19 @@ export default function EventAnimation({
     let height = canvas.clientHeight;
     const system = createSystem(profile, width, height);
 
-    const applySize = () => {
+    /**
+     * Measures the element and resizes the canvas with it.
+     *
+     * Returns false when there is nothing to draw into. A canvas can be
+     * zero-sized when its effect first runs — layout not settled, a font still
+     * swapping, a mobile browser mid address-bar transition — and one sized at
+     * zero stays blank: the backing store is zero and a window `resize` never
+     * comes to fix it, because the window did not resize, the element did.
+     */
+    const applySize = (): boolean => {
       width = canvas.clientWidth;
       height = canvas.clientHeight;
+      if (width === 0 || height === 0) return false;
       // Cap the device pixel ratio: a 3x phone screen triples the fill cost for
       // soft-edged particles nobody can resolve anyway.
       const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -148,6 +158,7 @@ export default function EventAnimation({
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       system.resize(width, height);
+      return true;
     };
 
     applySize();
@@ -157,12 +168,14 @@ export default function EventAnimation({
     // Reduced motion still gets the scene — just one frame of it, held still.
     if (reduce.matches) {
       paint(ctx, system.particles, profile, width, height);
-      const onResize = () => {
-        applySize();
+      // Watches the element rather than the window, so a canvas that had no
+      // size at mount still gets its one frame once it does.
+      const observer = new ResizeObserver(() => {
+        if (!applySize()) return;
         paint(ctx, system.particles, profile, width, height);
-      };
-      window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
+      });
+      observer.observe(canvas);
+      return () => observer.disconnect();
     }
 
     let frame = 0;
@@ -176,12 +189,16 @@ export default function EventAnimation({
       last = now;
 
       system.step(dt, now / 1000);
-      paint(ctx, system.particles, profile, width, height);
+      if (width > 0 && height > 0) {
+        paint(ctx, system.particles, profile, width, height);
+      }
       frame = requestAnimationFrame(tick);
     };
 
     const start = () => {
-      if (running) return;
+      // Without a size there is nothing to paint into; the ResizeObserver
+      // below calls start() again once there is.
+      if (running || width === 0 || height === 0) return;
       running = true;
       last = performance.now();
       frame = requestAnimationFrame(tick);
@@ -210,16 +227,18 @@ export default function EventAnimation({
       else if (!observer || canvas.getBoundingClientRect().bottom > 0) start();
     };
 
-    const onResize = () => applySize();
+    const sizeObserver = new ResizeObserver(() => {
+      if (applySize()) start();
+    });
+    sizeObserver.observe(canvas);
 
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("resize", onResize);
 
     return () => {
       stop();
       observer?.disconnect();
+      sizeObserver.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("resize", onResize);
     };
   }, [animation]);
 
