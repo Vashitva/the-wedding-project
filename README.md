@@ -502,6 +502,7 @@ src/app/
 src/lib/
   concierge/knowledge.ts    Everything the concierge is allowed to know
   concierge/tools.ts        Directions and calendar, the only things it can do
+  paste.ts                  Turmeric brush: textured stamps, smears, handprints
   concierge/provider.ts     Which vendor answers, and how that gets decided
   concierge/providers/      One adapter each: anthropic.ts, openai.ts
   settings.ts               Dashboard preferences (no secrets)
@@ -623,6 +624,47 @@ sparkles, because the room moves even when the ring does not.
 simulation, the renderer and the rest pose all read from it, so moving the
 rings up or down is one number. Reduced motion skips the drop and paints the
 settled composition.
+
+### The haldi
+
+The powder in the air is the ambient layer; this is the other half of the
+ritual — paste actually going on. Three smears arrive in sequence and are
+**drawn**, not revealed: the brush advances along each path so you watch it
+applied, the way you watch an aunt do it. Then two handprints press down, which
+is the thing that gets left on doorframes for luck.
+
+Nothing here calls `ctx.stroke()`. A canvas stroke is a solid ribbon with clean
+edges, which is the one thing ground turmeric is not. `src/lib/paste.ts` presses
+a **textured stamp** repeatedly along the path instead, the way a finger lays
+paste: soft discs whose alpha is chewed up by value noise, with hard grains
+where the turmeric didn't grind down and gaps where it didn't take. Two passes
+per stamp — a wider, deeper rim underneath and a brighter core on top — because
+that ridge of pushed-aside paste is most of what makes a smear read as
+something with body rather than a coloured line.
+
+The width profile is the other tell. Paste goes on thin as the hand lands,
+swells where it presses, and breaks up as it lifts; a stroke of constant width
+reads as a painted stripe no matter how good the texture is.
+
+For the handprints, proportion is everything: fingers rise from the **top edge**
+of the palm, not from its centre, and each is far narrower than the palm's own
+stamps. The first version got both wrong and produced a blob with whiskers.
+
+Two things fall out of paste being paste:
+
+- **The canvas is append-only.** Completed smears are never redrawn; each frame
+  stamps only what the last few milliseconds newly uncovered. When the last
+  handprint lands the loop stops altogether — a page that has finished its
+  animation should cost nothing.
+- **The composition is laid out in the free band, not the frame.** A wide
+  desktop hero leaves the type the bottom third; a tall phone leaves it more
+  than half, because the same words wrap onto four lines. So the whole
+  arrangement is squeezed into whatever is actually free, with an inset at the
+  top as well — paste behind the couple's own names in the header looks like a
+  printing fault.
+
+Reduced motion paints the finished composition immediately: no movement, but
+the same picture, down to the pixel.
 
 ### The petals
 

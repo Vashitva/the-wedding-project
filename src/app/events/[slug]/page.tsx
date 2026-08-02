@@ -9,6 +9,7 @@ import Ornament from "@/components/Ornament";
 import Reveal from "@/components/Reveal";
 import EventAnimation from "@/components/EventAnimation";
 import RingDrop from "@/components/RingDrop";
+import HaldiSmear from "@/components/HaldiSmear";
 import AddToCalendar from "@/components/AddToCalendar";
 
 type Params = { slug: string };
@@ -66,6 +67,16 @@ export default async function EventPage({ params }: { params: Promise<Params> })
           {event.animation === "rings" && (
             <div aria-hidden className="absolute inset-0">
               <RingDrop />
+            </div>
+          )}
+
+          {/*
+            The haldi gets the other half of the ritual: the powder is in the
+            ambient layer, the paste going on is here.
+          */}
+          {event.animation === "haldi" && (
+            <div aria-hidden className="absolute inset-0">
+              <HaldiSmear />
             </div>
           )}
 
